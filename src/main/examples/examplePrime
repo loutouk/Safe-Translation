@@ -1,0 +1,21 @@
+let isPrime n =
+    let auxA a =
+      let auxB b =
+        if b = n then false
+        else if (a * b) = n then
+          true
+        else
+          auxB (b+1)
+      in
+      if a = n then true else
+      if auxB a then
+        false
+      else
+        auxA (a+1)
+    in
+    auxA 2
+  in
+  let nextPrime n =
+    if isPrime n then n else nextPrime (n+1)
+  in
+  nextPrime 3000
