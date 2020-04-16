@@ -2,25 +2,25 @@ grammar MyLang;
 
 program: term+ ;
 
-term: simple_term
-| LET IDENT EQUAL simple_term // var declaration
-| REF term // reference
-| term simple_term // application
-| term SEQ term // sequence
-| term COLEQ term // assoc
-| simple_term TIMES simple_term
-| simple_term PLUS simple_term
-| simple_term MINUS simple_term
-| simple_term EQUAL simple_term
-| simple_term LEQ simple_term
-| IF term THEN term ELSE term
-| term COMMA term // pair
-| LET IDENT parameters? EQUAL term IN term // let
-| FUN IDENT ARROW term
-| POP IDENT // list pop
-| POP list // list pop
-| simple_term PUSH IDENT // list push
-| simple_term PUSH list // list push
+term: simple_term                   # simpleTerm
+| LET IDENT EQUAL simple_term       # let
+| REF term                          # varDeclaration
+| term simple_term                  # application
+| term SEQ term                     # sequence
+| term COLEQ term                   # association
+| simple_term TIMES simple_term     # multiplication
+| simple_term PLUS simple_term      # addition
+| simple_term MINUS simple_term     # substraction
+| simple_term EQUAL simple_term     # equal
+| simple_term LEQ simple_term       # lessThan
+| IF term THEN term ELSE term       # ifThenElse
+| term COMMA term                   # pair
+| LET IDENT+ EQUAL term IN term     # letIn
+| FUN IDENT* ARROW term             # funDeclaration
+| POP IDENT                         # listPopId
+| POP list                          # listPopList
+| simple_term PUSH IDENT            # listPushId
+| simple_term PUSH list             # listPushList
 ;
 
 simple_term: BANG simple_term
@@ -29,10 +29,6 @@ simple_term: BANG simple_term
 | LPAR term RPAR
 | list
 ;
-
-parameters : parameter (parameter)* ;
-
-parameter : IDENT ;
 
 bool: TRUE | FALSE ;
 
