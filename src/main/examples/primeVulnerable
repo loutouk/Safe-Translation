@@ -1,5 +1,3 @@
-// use a library call inside a simple statement
-
 let isPrime n externalFunc ->
     let auxA a ->
       let auxB b ->

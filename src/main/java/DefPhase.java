@@ -11,9 +11,18 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 public class DefPhase extends RefMLBaseListener {
-    ParseTreeProperty<Scope> scopes = new ParseTreeProperty<Scope>();
-    GlobalScope globals;
-    Scope currentScope; // define symbols in this scope
+
+    private ParseTreeProperty<Scope> scopes = new ParseTreeProperty<Scope>();
+    private  GlobalScope globals;
+    private  Scope currentScope; // define symbols in this scope
+
+    public GlobalScope getGlobals() {
+        return globals;
+    }
+
+    public ParseTreeProperty<Scope> getScopes() {
+        return scopes;
+    }
 
     @Override
     public void enterProgram(RefMLParser.ProgramContext ctx) {
@@ -23,7 +32,7 @@ public class DefPhase extends RefMLBaseListener {
 
     @Override
     public void exitProgram(RefMLParser.ProgramContext ctx) {
-        System.out.println("GLOBLS: " + globals);
+        //System.out.println("GLOBLS: " + globals);
     }
 
     @Override
@@ -38,7 +47,7 @@ public class DefPhase extends RefMLBaseListener {
 
     @Override
     public void exitFunctionDecl(RefMLParser.FunctionDeclContext ctx) {
-        System.out.println("LOCALS: " + currentScope);
+        //System.out.println("LOCALS: " + currentScope);
         currentScope = currentScope.getEnclosingScope(); // pop scope
     }
 
@@ -51,7 +60,7 @@ public class DefPhase extends RefMLBaseListener {
 
     @Override
     public void exitInStat(RefMLParser.InStatContext ctx) {
-        System.out.println("LOCALS: " + currentScope);
+        //System.out.println("LOCALS: " + currentScope);
         currentScope = currentScope.getEnclosingScope(); // pop scope
     }
 

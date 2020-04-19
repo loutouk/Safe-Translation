@@ -163,8 +163,8 @@ public class RefMLLexer extends Lexer {
 		"\3\2\2\2\u00a6\u00a8\3\2\2\2\u00a7\u00a5\3\2\2\2\u00a8\u00a9\7\f\2\2\u00a9"+
 		"\u00aa\3\2\2\2\u00aa\u00ab\b\37\2\2\u00ab>\3\2\2\2\u00ac\u00ae\t\4\2\2"+
 		"\u00ad\u00ac\3\2\2\2\u00ae\u00af\3\2\2\2\u00af\u00ad\3\2\2\2\u00af\u00b0"+
-		"\3\2\2\2\u00b0\u00b1\3\2\2\2\u00b1\u00b2\b \3\2\u00b2@\3\2\2\2\b\2\u0093"+
-		"\u0095\u009d\u00a5\u00af\4\b\2\2\2\3\2";
+		"\3\2\2\2\u00b0\u00b1\3\2\2\2\u00b1\u00b2\b \2\2\u00b2@\3\2\2\2\b\2\u0093"+
+		"\u0095\u009d\u00a5\u00af\3\2\3\2";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

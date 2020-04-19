@@ -28,7 +28,7 @@ public class CheckSymbols {
     }
 
     public void process(String[] args) throws Exception {
-        String inputFile = "src/main/examples/fiboVulnerable";
+        String inputFile = "src/main/examples/primeVulnerable";
         if ( args.length>0 ) inputFile = args[0];
         InputStream is = System.in;
         if ( inputFile!=null ) {
@@ -48,8 +48,11 @@ public class CheckSymbols {
         walker.walk(def, tree);
 
         // create next phase and feed symbol table info from def to ref phase
-        RefPhase ref = new RefPhase(def.globals, def.scopes);
+        RefPhase ref = new RefPhase(def.getGlobals(), def.getScopes(), tokens);
         walker.walk(ref, tree);
+
+        // print back ALTERED stream
+        System.out.println("\n"+ref.getRewriter().getText());
     }
 
     public static void main(String[] args) throws Exception {

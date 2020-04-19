@@ -88,7 +88,7 @@ LETTER : [a-zA-Z] ;
 
 INT    :   [0-9]+ ;
 
-SL_COMMENT :   '//' .*? '\n' -> skip ; // single line comment
+SL_COMMENT :   '//' .*? '\n' -> channel(HIDDEN) ; // single line comment
 
 // sets the channel number so that it’s ignored but preserved for the parser
 WS     : [ \n\t\r]+ -> channel(HIDDEN) ;
