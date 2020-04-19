@@ -23,8 +23,12 @@ public class CheckSymbols {
         System.err.printf("line %d:%d %s\n", t.getLine(), t.getCharPositionInLine(), msg);
     }
 
+    public static void message(Token t, String msg) {
+        System.out.printf("line %d:%d %s\n", t.getLine(), t.getCharPositionInLine(), msg);
+    }
+
     public void process(String[] args) throws Exception {
-        String inputFile = "src/main/examples/primeVulnerable";
+        String inputFile = "src/main/examples/fiboVulnerable";
         if ( args.length>0 ) inputFile = args[0];
         InputStream is = System.in;
         if ( inputFile!=null ) {

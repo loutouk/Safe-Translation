@@ -59,7 +59,6 @@ public class RefPhase extends RefMLBaseListener {
         }
         if ( meth instanceof VariableSymbol ) {
             // we detect a free variable, this is where we need to do a translation
-            CheckSymbols.error(ctx.ID().getSymbol(), funcName+" evaluated as a free variable (func)");
 
             // move up to the context with the parent scope because this is where we want to add our custom functions
             // pushId at the beginning and popId at the end
@@ -74,19 +73,22 @@ public class RefPhase extends RefMLBaseListener {
 
             switch (ctxBrowser.getRuleIndex()){
                 case RefMLParser.RULE_functionDecl:
-                    System.err.println("inside a function declaration");
+                    CheckSymbols.message(ctx.ID().getSymbol(),
+                            funcName+" evaluated as a free variable (func) inside a function declaration");
                     RefMLParser.FunctionDeclContext funCxt =  (RefMLParser.FunctionDeclContext) ctxBrowser;
+
                     System.out.println(funCxt.statement().start.getStartIndex());
                     System.out.println(funCxt.statement().stop.getStopIndex());
-                    break;
-                case RefMLParser.RULE_varDecl:
-                    System.err.println("inside a variable declaration (not implemented yet)");
+
                     break;
                 case RefMLParser.RULE_statement:
-                    System.err.println("in a simple statement");
+                    CheckSymbols.message(ctx.ID().getSymbol(),
+                            funcName+" evaluated as a free variable (func) inside a simple statement");
                     RefMLParser.StatementContext statCxt =  (RefMLParser.StatementContext) ctxBrowser;
+
                     System.out.println(statCxt.start.getStartIndex());
                     System.out.println(statCxt.stop.getStopIndex());
+
                     break;
                 default:
                     System.err.println("context containing the free variable can not be handled (rule num. " + ctxBrowser.getRuleIndex() + ")");
