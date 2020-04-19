@@ -1,0 +1,12 @@
+// use a library call inside a function statement
+
+let a = ref 1 in
+   let b = ref 1 in
+   let fibo n externalFunc z ->
+     if n = 0 then ()
+     else
+       let t = !b in
+       b := !a + !b; externalFunc z ;
+       a := t; externalFunc () ;
+       fibo (n - 1)
+   in fibo 29; !a

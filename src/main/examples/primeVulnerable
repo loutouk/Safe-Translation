@@ -1,0 +1,23 @@
+// use a library call inside a simple statement
+
+let isPrime n externalFunc ->
+    let auxA a ->
+      let auxB b ->
+        if b = n then FALSE
+        else if (a * b) = n then
+          TRUE
+        else
+          auxB (b+1)
+      in
+      if a = n then TRUE else
+      if auxB a then
+        FALSE
+      else
+        externalFunc n ; auxA (a+1)
+    in
+    auxA 2 ; externalFunc ()
+  in
+  let nextPrime n ->
+    if isPrime n then n else nextPrime (n+1)
+  in
+  nextPrime 3000 ; externalFunc ()
