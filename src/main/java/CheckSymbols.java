@@ -28,7 +28,8 @@ public class CheckSymbols {
     }
 
     public void process(String[] args) throws Exception {
-        String inputFile = "src/main/examples/primeVulnerable";
+        // String inputFile = "src/main/examples/example";
+        String inputFile = null;
         if ( args.length>0 ) inputFile = args[0];
         InputStream is = System.in;
         if ( inputFile!=null ) {
@@ -41,7 +42,7 @@ public class CheckSymbols {
         parser.setBuildParseTree(true);
         ParseTree tree = parser.program();
         // show tree in text form
-        // System.out.println(tree.toStringTree(parser));
+        System.out.println(tree.toStringTree(parser));
 
         ParseTreeWalker walker = new ParseTreeWalker();
         DefPhase def = new DefPhase();

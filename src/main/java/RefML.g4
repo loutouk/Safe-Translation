@@ -18,7 +18,7 @@ statement : statement IN statement              # InStat
     | IF expr THEN statement (ELSE statement)?  # IfStat
     ;
 
-expr:   ID exprList            # Call
+expr:   ID LCUR exprList? RCUR # Call
     |   BANG expr              # Bang
     |   expr TIMES expr        # Mult
     |   expr PLUS expr         # Add
@@ -31,13 +31,15 @@ expr:   ID exprList            # Call
     |   ID                     # Var
     |   LPAR expr RPAR         # Parenthesis
     |   consts                 # Constant
-    |   POP ID                 # ListPopId
+    |   POP BANG? ID           # ListPopId
     |   POP list               # ListPopList
-    |   expr PUSH ID           # ListPushId
+    |   PEEK BANG? ID          # ListPeekId
+    |   PEEK list              # ListPeekList
+    |   expr PUSH BANG? ID     # ListPushId
     |   expr PUSH list         # ListPushList
     ;
 
-exprList : expr (expr)* ;   // arg list
+exprList : expr (COMMA expr)* ;   // arg list
 
 list : LBRA (list_elements)? RBRA ;
 
@@ -48,6 +50,7 @@ list_element : consts ;
 consts: INT
     | bool
     | UNIT
+    | list
     ;
 
 bool: TRUE
@@ -62,6 +65,8 @@ LPAR   : '(' ;
 RPAR   : ')' ;
 LBRA   : '[' ;
 RBRA   : ']' ;
+LCUR   : '{' ;
+RCUR   : '}' ;
 REF    : 'ref' ;
 UNIT   : '()' ;
 LET    : 'let' ;
@@ -79,6 +84,7 @@ THEN   : 'then' ;
 ELSE   : 'else' ;
 COMMA  : ',' ;
 POP    : 'pop' ;
+PEEK   : 'peek' ;
 PUSH   : '::' ;
 
 ID     :   LETTER (LETTER | [0-9])* ;

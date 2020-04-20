@@ -225,6 +225,18 @@ public interface RefMLListener extends ParseTreeListener {
 	 */
 	void exitListPopId(RefMLParser.ListPopIdContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code ListPeekList}
+	 * labeled alternative in {@link RefMLParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterListPeekList(RefMLParser.ListPeekListContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ListPeekList}
+	 * labeled alternative in {@link RefMLParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitListPeekList(RefMLParser.ListPeekListContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code LessEqual}
 	 * labeled alternative in {@link RefMLParser#expr}.
 	 * @param ctx the parse tree
@@ -248,6 +260,18 @@ public interface RefMLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitListPushList(RefMLParser.ListPushListContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ListPeekId}
+	 * labeled alternative in {@link RefMLParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterListPeekId(RefMLParser.ListPeekIdContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ListPeekId}
+	 * labeled alternative in {@link RefMLParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitListPeekId(RefMLParser.ListPeekIdContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code ListPushId}
 	 * labeled alternative in {@link RefMLParser#expr}.

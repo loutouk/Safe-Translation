@@ -1,3 +1,0 @@
-let fun externalFunc a ->
-     let varA = externalFunc a ; let varB = externalFunc () ; let varC = 3
-        in varA + varB + varC

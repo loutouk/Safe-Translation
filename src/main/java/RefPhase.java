@@ -7,10 +7,16 @@ import java.util.HashSet;
 
 public class RefPhase extends RefMLBaseListener {
 
-    private static final String PUSH_CALL  = "pushId() ; ";
-    private static final String POP_CALL   = " ; popId() ";
-    private static final String CHECK_CALL = " ; checkId()";
-    private static final String INIT_PILE  = "let pile = [];\nlet pushId() = ();\nlet popId() = ();\nlet checkId() = ();\n\n";
+    private static final String PUSH_CALL  = "let id = generateId{} in pushId{id} ; ";
+    private static final String POP_CALL   = " ; popId{} ";
+    private static final String CHECK_CALL = " ; checkId{id}";
+    private static final String INIT_PILE  =
+            "let pile = ref [] ;\n" +
+            "let id = ref 0 ;\n" +
+            "let generateId -> let x = !id in id := !id + 1 ; x ;\n" +
+            "let pushId id -> pile := id::!pile ;\n" +
+            "let popId -> pile := pop !pile ;\n" +
+            "let checkId id -> if peek !pile = id then raise{} else () ;\n\n";
 
     private ParseTreeProperty<Scope> scopes;
     private GlobalScope globals;
@@ -68,7 +74,6 @@ public class RefPhase extends RefMLBaseListener {
 
     @Override
     public void exitCall(RefMLParser.CallContext ctx) {
-        System.out.println("exit call " + ctx.getText());
         String funcName = ctx.ID().getText();
         Symbol meth = currentScope.resolve(funcName);
         if ( meth==null ) {
@@ -91,30 +96,39 @@ public class RefPhase extends RefMLBaseListener {
             }
 
             switch (ctxBrowser.getRuleIndex()){
+
                 case RefMLParser.RULE_functionDecl:
                     CheckSymbols.message(ctx.ID().getSymbol(),
                             funcName+" evaluated as a free variable (func) inside a function declaration");
                     RefMLParser.FunctionDeclContext funCxt =  (RefMLParser.FunctionDeclContext) ctxBrowser;
 
-                    rewriter.insertAfter(ctx.exprList().stop, CHECK_CALL);
+                    rewriter.insertAfter(ctx.RCUR().getSymbol().getTokenIndex(), CHECK_CALL);
                     if(editedScopes.add(scopeBrowser)){
                         rewriter.insertAfter(funCxt.statement().start.getTokenIndex()-1, PUSH_CALL);
-                        rewriter.insertAfter(funCxt.statement().stop, POP_CALL);
+                        rewriter.insertAfter(funCxt.statement().stop.getTokenIndex(), POP_CALL);
                     }
 
                     break;
+
                 case RefMLParser.RULE_statement:
+
                     CheckSymbols.message(ctx.ID().getSymbol(),
                             funcName+" evaluated as a free variable (func) inside a simple statement");
                     RefMLParser.StatementContext statCxt =  (RefMLParser.StatementContext) ctxBrowser;
 
-                    rewriter.insertAfter(ctx.exprList().stop, CHECK_CALL);
+                    rewriter.insertAfter(ctx.RCUR().getSymbol().getTokenIndex(), CHECK_CALL);
                     if(editedScopes.add(scopeBrowser)){
-                        rewriter.insertAfter(statCxt.start, PUSH_CALL);
-                        rewriter.insertAfter(statCxt.stop, POP_CALL);
+                        rewriter.insertAfter(statCxt.getStart().getTokenIndex()-1, PUSH_CALL);
+                        rewriter.insertAfter(statCxt.getStop().getTokenIndex()+1, POP_CALL);
+                        // TODO fix the hack
+                        /*uses getTokenIndex()+1 to have the check() before the pop()
+                        but this may lead to have the pop in the wrong place
+                        should use getTokenIndex()
+                        solution: place the check in the first pass and the pop() and push() in a second?*/
                     }
 
                     break;
+
                 default:
                     System.err.println("context containing the free variable can not be handled (rule num. " + ctxBrowser.getRuleIndex() + ")");
                     break;
