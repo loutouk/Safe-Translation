@@ -17,7 +17,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
-public class CheckSymbols {
+public class Translator {
 
     public static void error(Token t, String msg) {
         System.err.printf("line %d:%d %s\n", t.getLine(), t.getCharPositionInLine(), msg);
@@ -42,7 +42,7 @@ public class CheckSymbols {
         parser.setBuildParseTree(true);
         ParseTree tree = parser.program();
         // show tree in text form
-        System.out.println(tree.toStringTree(parser));
+        System.out.println("\n"+tree.toStringTree(parser)+"\n");
 
         ParseTreeWalker walker = new ParseTreeWalker();
         DefPhase def = new DefPhase();
@@ -53,10 +53,10 @@ public class CheckSymbols {
         walker.walk(ref, tree);
 
         // print back ALTERED stream
-        System.out.println("\n"+ref.getRewriter().getText());
+        System.out.println("\nTranslation:\n\n"+ref.getRewriter().getText());
     }
 
     public static void main(String[] args) throws Exception {
-        new CheckSymbols().process(args);
+        new Translator().process(args);
     }
 }

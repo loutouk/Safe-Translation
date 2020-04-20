@@ -65,10 +65,10 @@ public class RefPhase extends RefMLBaseListener {
         String name = ctx.ID().getSymbol().getText();
         Symbol var = currentScope.resolve(name);
         if ( var==null ) {
-            CheckSymbols.error(ctx.ID().getSymbol(), "no such variable: "+name);
+            Translator.error(ctx.ID().getSymbol(), "no such variable: "+name);
         }
         if ( var instanceof FunctionSymbol ) {
-            CheckSymbols.error(ctx.ID().getSymbol(), name+" is not a variable");
+            Translator.error(ctx.ID().getSymbol(), name+" is not a variable");
         }
     }
 
@@ -79,7 +79,7 @@ public class RefPhase extends RefMLBaseListener {
         if ( meth==null ) {
             // we consider that library calls (free variable) must be defined (declared or received as func parameter)
             // otherwise, it should be an error (uninitialized variable)
-            CheckSymbols.error(ctx.ID().getSymbol(), "no such function: "+funcName);
+            Translator.error(ctx.ID().getSymbol(), "no such function: "+funcName);
         }
         if ( meth instanceof VariableSymbol ) {
             // we detect a free variable, this is where we need to do a translation
@@ -98,7 +98,7 @@ public class RefPhase extends RefMLBaseListener {
             switch (ctxBrowser.getRuleIndex()){
 
                 case RefMLParser.RULE_functionDecl:
-                    CheckSymbols.message(ctx.ID().getSymbol(),
+                    Translator.message(ctx.ID().getSymbol(),
                             funcName+" evaluated as a free variable (func) inside a function declaration");
                     RefMLParser.FunctionDeclContext funCxt =  (RefMLParser.FunctionDeclContext) ctxBrowser;
 
@@ -112,7 +112,7 @@ public class RefPhase extends RefMLBaseListener {
 
                 case RefMLParser.RULE_statement:
 
-                    CheckSymbols.message(ctx.ID().getSymbol(),
+                    Translator.message(ctx.ID().getSymbol(),
                             funcName+" evaluated as a free variable (func) inside a simple statement");
                     RefMLParser.StatementContext statCxt =  (RefMLParser.StatementContext) ctxBrowser;
 
