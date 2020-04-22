@@ -333,15 +333,27 @@ public interface RefMLListener extends ParseTreeListener {
 	 */
 	void exitEqual(RefMLParser.EqualContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RefMLParser#exprList}.
+	 * Enter a parse tree produced by the {@code Negate}
+	 * labeled alternative in {@link RefMLParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterExprList(RefMLParser.ExprListContext ctx);
+	void enterNegate(RefMLParser.NegateContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RefMLParser#exprList}.
+	 * Exit a parse tree produced by the {@code Negate}
+	 * labeled alternative in {@link RefMLParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitExprList(RefMLParser.ExprListContext ctx);
+	void exitNegate(RefMLParser.NegateContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link RefMLParser#argList}.
+	 * @param ctx the parse tree
+	 */
+	void enterArgList(RefMLParser.ArgListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link RefMLParser#argList}.
+	 * @param ctx the parse tree
+	 */
+	void exitArgList(RefMLParser.ArgListContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RefMLParser#list}.
 	 * @param ctx the parse tree

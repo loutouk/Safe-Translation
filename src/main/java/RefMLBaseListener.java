@@ -351,13 +351,25 @@ public class RefMLBaseListener implements RefMLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExprList(RefMLParser.ExprListContext ctx) { }
+	@Override public void enterNegate(RefMLParser.NegateContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitExprList(RefMLParser.ExprListContext ctx) { }
+	@Override public void exitNegate(RefMLParser.NegateContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArgList(RefMLParser.ArgListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArgList(RefMLParser.ArgListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

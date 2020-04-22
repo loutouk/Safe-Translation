@@ -28,8 +28,8 @@ public class Translator {
     }
 
     public void process(String[] args) throws Exception {
-        // String inputFile = "src/main/examples/example";
-        String inputFile = null;
+        String inputFile = "src/main/examples/fiboFolder/fiboVulnerable";
+        //String inputFile = null;
         if ( args.length>0 ) inputFile = args[0];
         InputStream is = System.in;
         if ( inputFile!=null ) {
@@ -42,7 +42,7 @@ public class Translator {
         parser.setBuildParseTree(true);
         ParseTree tree = parser.program();
         // show tree in text form
-        System.out.println("\n"+tree.toStringTree(parser)+"\n");
+        //System.out.println("\n"+tree.toStringTree(parser)+"\n");
 
         ParseTreeWalker walker = new ParseTreeWalker();
         DefPhase def = new DefPhase();

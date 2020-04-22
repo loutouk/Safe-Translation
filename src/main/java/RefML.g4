@@ -18,13 +18,13 @@ statement : statement IN statement              # InStat
     | IF expr THEN statement (ELSE statement)?  # IfStat
     ;
 
-expr:   ID LCUR exprList? RCUR # Call
+expr:   ID LPAR argList? RPAR  # Call
     |   BANG expr              # Bang
     |   expr TIMES expr        # Mult
     |   expr PLUS expr         # Add
     |   expr MINUS expr        # Sub
     // not implemented yet because it overrides the expr above like (n-1), use (0-x) instead
-    //  |   MINUS expr             # Negate
+    |   MINUS expr             # Negate
     |   expr EQUAL expr        # Equal
     |   expr COLEQ expr        # Association
     |   expr LEQ expr          # LessEqual
@@ -39,7 +39,7 @@ expr:   ID LCUR exprList? RCUR # Call
     |   expr PUSH list         # ListPushList
     ;
 
-exprList : expr (COMMA expr)* ;   // arg list
+argList : expr (COMMA expr)*;   // arg list
 
 list : LBRA (list_elements)? RBRA ;
 
@@ -49,7 +49,7 @@ list_element : consts ;
 
 consts: INT
     | bool
-    | UNIT
+    | LPAR RPAR // unit
     | list
     ;
 
@@ -68,7 +68,6 @@ RBRA   : ']' ;
 LCUR   : '{' ;
 RCUR   : '}' ;
 REF    : 'ref' ;
-UNIT   : '()' ;
 LET    : 'let' ;
 REC    : 'rec' ;
 BANG   : '!' ;
@@ -91,7 +90,6 @@ ID     :   LETTER (LETTER | [0-9])* ;
 
 fragment
 LETTER : [a-zA-Z] ;
-
 INT    :   [0-9]+ ;
 
 SL_COMMENT :   '//' .*? '\n' -> channel(HIDDEN) ; // single line comment
