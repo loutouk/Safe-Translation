@@ -17,15 +17,63 @@ public interface RefMLListener extends ParseTreeListener {
 	 */
 	void exitProgram(RefMLParser.ProgramContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RefMLParser#functionDecl}.
+	 * Enter a parse tree produced by {@link RefMLParser#declarations}.
 	 * @param ctx the parse tree
 	 */
-	void enterFunctionDecl(RefMLParser.FunctionDeclContext ctx);
+	void enterDeclarations(RefMLParser.DeclarationsContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link RefMLParser#functionDecl}.
+	 * Exit a parse tree produced by {@link RefMLParser#declarations}.
 	 * @param ctx the parse tree
 	 */
-	void exitFunctionDecl(RefMLParser.FunctionDeclContext ctx);
+	void exitDeclarations(RefMLParser.DeclarationsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code varDecl}
+	 * labeled alternative in {@link RefMLParser#variableDecl}.
+	 * @param ctx the parse tree
+	 */
+	void enterVarDecl(RefMLParser.VarDeclContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code varDecl}
+	 * labeled alternative in {@link RefMLParser#variableDecl}.
+	 * @param ctx the parse tree
+	 */
+	void exitVarDecl(RefMLParser.VarDeclContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code varDeclIn}
+	 * labeled alternative in {@link RefMLParser#variableDecl}.
+	 * @param ctx the parse tree
+	 */
+	void enterVarDeclIn(RefMLParser.VarDeclInContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code varDeclIn}
+	 * labeled alternative in {@link RefMLParser#variableDecl}.
+	 * @param ctx the parse tree
+	 */
+	void exitVarDeclIn(RefMLParser.VarDeclInContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code funDecl}
+	 * labeled alternative in {@link RefMLParser#functionDecl}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunDecl(RefMLParser.FunDeclContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code funDecl}
+	 * labeled alternative in {@link RefMLParser#functionDecl}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunDecl(RefMLParser.FunDeclContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code funDeclIn}
+	 * labeled alternative in {@link RefMLParser#functionDecl}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunDeclIn(RefMLParser.FunDeclInContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code funDeclIn}
+	 * labeled alternative in {@link RefMLParser#functionDecl}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunDeclIn(RefMLParser.FunDeclInContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RefMLParser#formalParameters}.
 	 * @param ctx the parse tree
@@ -47,16 +95,6 @@ public interface RefMLListener extends ParseTreeListener {
 	 */
 	void exitFormalParameter(RefMLParser.FormalParameterContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link RefMLParser#varDecl}.
-	 * @param ctx the parse tree
-	 */
-	void enterVarDecl(RefMLParser.VarDeclContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RefMLParser#varDecl}.
-	 * @param ctx the parse tree
-	 */
-	void exitVarDecl(RefMLParser.VarDeclContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code VarStat}
 	 * labeled alternative in {@link RefMLParser#statement}.
 	 * @param ctx the parse tree
@@ -68,18 +106,6 @@ public interface RefMLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitVarStat(RefMLParser.VarStatContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code FuncStat}
-	 * labeled alternative in {@link RefMLParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void enterFuncStat(RefMLParser.FuncStatContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code FuncStat}
-	 * labeled alternative in {@link RefMLParser#statement}.
-	 * @param ctx the parse tree
-	 */
-	void exitFuncStat(RefMLParser.FuncStatContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code IfStat}
 	 * labeled alternative in {@link RefMLParser#statement}.
@@ -117,17 +143,15 @@ public interface RefMLListener extends ParseTreeListener {
 	 */
 	void exitSeqStat(RefMLParser.SeqStatContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code InStat}
-	 * labeled alternative in {@link RefMLParser#statement}.
+	 * Enter a parse tree produced by {@link RefMLParser#argList}.
 	 * @param ctx the parse tree
 	 */
-	void enterInStat(RefMLParser.InStatContext ctx);
+	void enterArgList(RefMLParser.ArgListContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code InStat}
-	 * labeled alternative in {@link RefMLParser#statement}.
+	 * Exit a parse tree produced by {@link RefMLParser#argList}.
 	 * @param ctx the parse tree
 	 */
-	void exitInStat(RefMLParser.InStatContext ctx);
+	void exitArgList(RefMLParser.ArgListContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code Add}
 	 * labeled alternative in {@link RefMLParser#expr}.
@@ -344,16 +368,6 @@ public interface RefMLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNegate(RefMLParser.NegateContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link RefMLParser#argList}.
-	 * @param ctx the parse tree
-	 */
-	void enterArgList(RefMLParser.ArgListContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link RefMLParser#argList}.
-	 * @param ctx the parse tree
-	 */
-	void exitArgList(RefMLParser.ArgListContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link RefMLParser#list}.
 	 * @param ctx the parse tree

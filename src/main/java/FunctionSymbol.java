@@ -13,8 +13,8 @@ public class FunctionSymbol extends Symbol implements Scope {
     Map<String, Symbol> orderedArgs = new LinkedHashMap<String, Symbol>();
     Scope enclosingScope;
 
-    public FunctionSymbol(String name, Scope enclosingScope) {
-        super(name);
+    public FunctionSymbol(String name, Type.SymbolType type, Scope enclosingScope) {
+        super(name, type);
         this.enclosingScope = enclosingScope;
     }
 

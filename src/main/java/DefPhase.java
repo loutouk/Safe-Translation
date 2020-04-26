@@ -36,46 +36,45 @@ public class DefPhase extends RefMLBaseListener {
     }
 
     @Override
-    public void enterFunctionDecl(RefMLParser.FunctionDeclContext ctx) {
-        String name = ctx.ID().getText();
-        // push new scope by making new one that points to enclosing scope
-        FunctionSymbol function = new FunctionSymbol(name, currentScope);
-        currentScope.define(function); // Define function in current scope
-        saveScope(ctx, function);      // Push: set function's parent to current
-        currentScope = function;       // Current scope is now function scope
-    }
-
-    @Override
-    public void exitFunctionDecl(RefMLParser.FunctionDeclContext ctx) {
-        //System.out.println("LOCALS: " + currentScope);
-        currentScope = currentScope.getEnclosingScope(); // pop scope
-    }
-
-    @Override
-    public void enterInStat(RefMLParser.InStatContext ctx) {
+    public void enterVarDeclIn(RefMLParser.VarDeclInContext ctx) {
         // push new local scope
         currentScope = new LocalScope(currentScope);
         saveScope(ctx, currentScope);
     }
 
     @Override
-    public void exitInStat(RefMLParser.InStatContext ctx) {
-        //System.out.println("LOCALS: " + currentScope);
-        currentScope = currentScope.getEnclosingScope(); // pop scope
+    public void enterFunDeclIn(RefMLParser.FunDeclInContext ctx) {
+        // push new local scope
+        currentScope = new LocalScope(currentScope);
+        saveScope(ctx, currentScope);
     }
 
     @Override
     public void exitFormalParameter(RefMLParser.FormalParameterContext ctx) {
-        defineVar(ctx.ID().getSymbol());
+        defineVar(ctx.ID().getSymbol(), Type.SymbolType.FUN_ARG);
     }
 
-    @Override
-    public void exitVarDecl(RefMLParser.VarDeclContext ctx) {
-        defineVar(ctx.ID().getSymbol());
+
+    @Override public void exitVarDecl(RefMLParser.VarDeclContext ctx) {
+        defineVar(ctx.ID().getSymbol(), Type.SymbolType.VAR);
     }
 
-    void defineVar(Token nameToken) {
-        VariableSymbol var = new VariableSymbol(nameToken.getText());
+    @Override public void exitVarDeclIn(RefMLParser.VarDeclInContext ctx) {
+        defineVar(ctx.ID().getSymbol(), Type.SymbolType.VAR);
+        currentScope = currentScope.getEnclosingScope(); // pop scope
+    }
+
+    @Override public void exitFunDecl(RefMLParser.FunDeclContext ctx) {
+        defineVar(ctx.ID().getSymbol(), Type.SymbolType.VAR);
+    }
+
+    @Override public void exitFunDeclIn(RefMLParser.FunDeclInContext ctx) {
+        defineVar(ctx.ID().getSymbol(), Type.SymbolType.VAR);
+        currentScope = currentScope.getEnclosingScope(); // pop scope
+    }
+
+    void defineVar(Token nameToken, Type.SymbolType type) {
+        VariableSymbol var = new VariableSymbol(nameToken.getText(), type);
         currentScope.define(var); // Define symbol in current scope
     }
 

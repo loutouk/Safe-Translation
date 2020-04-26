@@ -27,13 +27,61 @@ public class RefMLBaseListener implements RefMLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterFunctionDecl(RefMLParser.FunctionDeclContext ctx) { }
+	@Override public void enterDeclarations(RefMLParser.DeclarationsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitFunctionDecl(RefMLParser.FunctionDeclContext ctx) { }
+	@Override public void exitDeclarations(RefMLParser.DeclarationsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterVarDecl(RefMLParser.VarDeclContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitVarDecl(RefMLParser.VarDeclContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterVarDeclIn(RefMLParser.VarDeclInContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitVarDeclIn(RefMLParser.VarDeclInContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFunDecl(RefMLParser.FunDeclContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFunDecl(RefMLParser.FunDeclContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFunDeclIn(RefMLParser.FunDeclInContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFunDeclIn(RefMLParser.FunDeclInContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -63,18 +111,6 @@ public class RefMLBaseListener implements RefMLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterVarDecl(RefMLParser.VarDeclContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitVarDecl(RefMLParser.VarDeclContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterVarStat(RefMLParser.VarStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -82,18 +118,6 @@ public class RefMLBaseListener implements RefMLListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitVarStat(RefMLParser.VarStatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterFuncStat(RefMLParser.FuncStatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFuncStat(RefMLParser.FuncStatContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -135,13 +159,13 @@ public class RefMLBaseListener implements RefMLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInStat(RefMLParser.InStatContext ctx) { }
+	@Override public void enterArgList(RefMLParser.ArgListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInStat(RefMLParser.InStatContext ctx) { }
+	@Override public void exitArgList(RefMLParser.ArgListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -358,18 +382,6 @@ public class RefMLBaseListener implements RefMLListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitNegate(RefMLParser.NegateContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterArgList(RefMLParser.ArgListContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitArgList(RefMLParser.ArgListContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -10,12 +10,17 @@ public class Symbol { // A generic programming language symbol
 
     String name;      // All symbols at least have a name
     Scope scope;      // All symbols know what scope contains them.
+    Type.SymbolType type;
 
-    public Symbol(String name) { this.name = name; }
+    public Symbol(String name, Type.SymbolType type) { this.name = name; this.type=type;}
 
     public String getName() { return name; }
 
     public String toString() {
         return getName();
+    }
+
+    public Type.SymbolType getType() {
+        return type;
     }
 }

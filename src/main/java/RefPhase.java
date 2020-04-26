@@ -7,22 +7,30 @@ import java.util.HashSet;
 
 public class RefPhase extends RefMLBaseListener {
 
-    private static final String PUSH_CALL  = "let id = generateId() in pushId(id) ; ";
-    private static final String POP_CALL   = " ; popId() ";
-    private static final String CHECK_CALL = " ; checkId(id)";
+    private static int STACK_ID_COUNTER=1;
+
     private static final String INIT_PILE  =
-            "let pile = ref [] ;\n" +
+            "\nexception Error ;\n" +
+            "let stack = ref [] ;\n" +
             "let id = ref 0 ;\n" +
-            "let generateId -> let x = !id in id := !id + 1 ; x ;\n" +
-            "let pushId id -> pile := id::!pile ;\n" +
-            "let popId -> pile := pop !pile ;\n" +
-            "let checkId id -> if peek !pile = id then raise() else () ;\n\n";
+            "let generateId () = let x = !id in id := !id + 1 ; x ;\n" +
+            "let pushId localId = stack := localId::!stack ;\n" +
+            "let popId () =\n" +
+                    "   begin match !stack with\n" +
+                    "   | [] -> failwith \"Error, empty stack!\"\n" +
+                    "   | hd::tl -> stack := tl\n" +
+                    "   end\n" +
+            "let checkId localId =\n" +
+                    "   begin match !stack with\n" +
+                    "   | [] -> failwith \"Error, stack id mismatch!\"\n" +
+                    "   | hd::_ -> if hd != localId then failwith \"Error, stack id mismatch!\"\n" +
+                    "   end\n\n";
 
     private ParseTreeProperty<Scope> scopes;
     private GlobalScope globals;
     private Scope currentScope; // resolve symbols starting in this scope
     private TokenStreamRewriter rewriter;
-    private HashSet<Scope> editedScopes = new HashSet<Scope>(); // stores scopes for which push and pop fun have been added
+    private HashSet<ParserRuleContext> editedCtx = new HashSet<ParserRuleContext>(); // stores scopes for which push and pop fun have been added
 
     public RefPhase(GlobalScope globals, ParseTreeProperty<Scope> scopes, TokenStream tokens) {
         this.scopes = scopes;
@@ -41,22 +49,20 @@ public class RefPhase extends RefMLBaseListener {
     }
 
     @Override
-    public void enterFunctionDecl(RefMLParser.FunctionDeclContext ctx) {
+    public void enterVarDeclIn(RefMLParser.VarDeclInContext ctx) {
         currentScope = scopes.get(ctx);
     }
 
     @Override
-    public void exitFunctionDecl(RefMLParser.FunctionDeclContext ctx) {
+    public void enterFunDeclIn(RefMLParser.FunDeclInContext ctx) {
+        currentScope = scopes.get(ctx);
+    }
+
+    @Override public void exitVarDeclIn(RefMLParser.VarDeclInContext ctx) {
         currentScope = currentScope.getEnclosingScope();
     }
 
-    @Override
-    public void enterInStat(RefMLParser.InStatContext ctx) {
-        currentScope = scopes.get(ctx);
-    }
-
-    @Override
-    public void exitInStat(RefMLParser.InStatContext ctx) {
+    @Override public void exitFunDeclIn(RefMLParser.FunDeclInContext ctx) {
         currentScope = currentScope.getEnclosingScope();
     }
 
@@ -74,67 +80,127 @@ public class RefPhase extends RefMLBaseListener {
 
     @Override
     public void exitCall(RefMLParser.CallContext ctx) {
+
         String funcName = ctx.ID().getText();
-        Symbol meth = currentScope.resolve(funcName);
-        if ( meth==null ) {
-            // we consider that library calls (free variable) must be defined (declared or received as func parameter)
-            // otherwise, it should be an error (uninitialized variable)
-            Translator.error(ctx.ID().getSymbol(), "no such function: "+funcName);
-        }
-        if ( meth instanceof VariableSymbol ) {
+        int callPos = ctx.ID().getSymbol().getStartIndex();
+        Symbol symbol = currentScope.resolve(funcName);
+
+        // we consider that library calls (free variable) must be defined (as func parameter)
+        // otherwise, it should be an error (uninitialized variable)
+        if (symbol==null) { Translator.error(ctx.ID().getSymbol(), "no such variable: " + funcName); }
+
+        // we want free variables to be defined as function parameter
+        // if it is defined as a variable, it is then by definition, not a free variable anymore
+        else if ((symbol instanceof VariableSymbol) && (symbol.getType()==Type.SymbolType.FUN_ARG)) {
+
+
             // we detect a free variable, this is where we need to do a translation
-
-            // move up to the context with the parent scope because this is where we want to add our custom functions
-            // pushId at the beginning and popId at the end
-            // checkId just after the each external function call
-
+            boolean backtrackDone=false; // to flag when we terminate our ascent
             ParserRuleContext ctxBrowser = ctx;
-            Scope scopeBrowser = scopes.get(ctx);
-            while(scopeBrowser==scopes.get(ctx)){
-                ctxBrowser = ctxBrowser.getParent();
-                scopeBrowser=scopes.get(ctxBrowser);
-            }
+            Integer ruleCtx = null; // the kind of statement we find the call in
 
-            switch (ctxBrowser.getRuleIndex()){
+            do{ // we ascent until we find a context where we can declare our security functions
 
-                case RefMLParser.RULE_functionDecl:
-                    Translator.message(ctx.ID().getSymbol(),
-                            funcName+" evaluated as a free variable (func) inside a function declaration");
-                    RefMLParser.FunctionDeclContext funCxt =  (RefMLParser.FunctionDeclContext) ctxBrowser;
+                if(ctxBrowser.getRuleIndex()==RefMLParser.RULE_functionDecl) {
+                    backtrackDone=true;
+                    ruleCtx=RefMLParser.RULE_functionDecl;
+                }else if(ctxBrowser.getRuleIndex()==RefMLParser.RULE_variableDecl) {
+                    backtrackDone=true;
+                    ruleCtx=RefMLParser.RULE_variableDecl;
+                }
 
-                    rewriter.insertAfter(ctx.RPAR().getSymbol().getTokenIndex(), CHECK_CALL);
-                    if(editedScopes.add(scopeBrowser)){
-                        // TODO fix the hack
-                        /*uses getTokenIndex()+1 to have the check() before the pop()
-                        but this may lead to have the pop in the wrong place
-                        should use getTokenIndex()
-                        solution: place the check in the first pass and the pop() and push() in a second?*/
-                        rewriter.insertAfter(funCxt.statement().start.getTokenIndex()-1, PUSH_CALL);
-                        rewriter.insertAfter(funCxt.statement().stop.getTokenIndex()+1, POP_CALL);
+                if(!backtrackDone){
+                    System.out.println(ctxBrowser.getText() + " " + ctxBrowser.getRuleIndex());
+                    ctxBrowser = ctxBrowser.getParent();
+                }
+
+            }while(!backtrackDone);
+
+            Translator.message(ctx.ID().getSymbol(), funcName + " evaluated as a free variable");
+
+            // we need to insert a check call after each free variable func call
+            rewriter.insertAfter(ctx.argList().getStop().getTokenIndex(), createCheckCall());
+
+            if(ruleCtx==RefMLParser.RULE_functionDecl){
+
+                RefMLParser.FunctionDeclContext funCtx =  (RefMLParser.FunctionDeclContext) ctxBrowser;
+                // the insertion of the security functions are different whether we are in an IN statement or not
+                if(funCtx instanceof RefMLParser.FunDeclInContext){
+                    RefMLParser.FunDeclInContext funInCtx =  (RefMLParser.FunDeclInContext) funCtx;
+                    // we only need to insert the push and pop func once in a context statement
+                    // no matter hwo many external func calls are made
+
+                    if(funInCtx.IN().getSymbol().getStartIndex()<callPos){
+                        if(editedCtx.add(funInCtx.statement(1))) {
+                            System.out.println("in fun ctx after in");
+                            rewriter.insertAfter(funInCtx.statement(1).getStart().getTokenIndex()-1, createPushCall(funInCtx.statement(1).hashCode()));
+                            rewriter.insertAfter(funInCtx.statement(1).getStop().getTokenIndex()+1, createPopCall(funInCtx.statement(1).hashCode()));
+                        }
+                    }else{
+                        if(editedCtx.add(funInCtx.statement(0))) {
+                            System.out.println("in fun ctx before in");
+                            rewriter.insertAfter(funInCtx.statement(0).getStart().getTokenIndex()-1, createPushCall(funInCtx.statement(0).hashCode()));
+                            rewriter.insertAfter(funInCtx.statement(0).getStop().getTokenIndex()+1, createPopCall(funInCtx.statement(0).hashCode()));
+                        }
                     }
 
-                    break;
-
-                case RefMLParser.RULE_statement:
-
-                    Translator.message(ctx.ID().getSymbol(),
-                            funcName+" evaluated as a free variable (func) inside a simple statement");
-                    RefMLParser.StatementContext statCxt =  (RefMLParser.StatementContext) ctxBrowser;
-
-                    rewriter.insertAfter(ctx.RPAR().getSymbol().getTokenIndex(), CHECK_CALL);
-                    if(editedScopes.add(scopeBrowser)){
-                        rewriter.insertAfter(statCxt.getStart().getTokenIndex()-1, PUSH_CALL);
-                        rewriter.insertAfter(statCxt.getStop().getTokenIndex()+1, POP_CALL);
+                }
+                if(funCtx instanceof RefMLParser.FunDeclContext){
+                    System.out.println("simple fun ctx");
+                    RefMLParser.FunDeclContext funSimplCtx =  (RefMLParser.FunDeclContext) funCtx;
+                    // we only need to insert the push and pop func once in a context statement
+                    // no matter hwo many external func calls are made
+                    if(editedCtx.add(funSimplCtx)){
+                        rewriter.insertAfter(funSimplCtx.statement().getStart().getTokenIndex()-1, createPushCall(funSimplCtx.hashCode()));
+                        rewriter.insertAfter(funSimplCtx.statement().getStop().getTokenIndex()+1, createPopCall(funSimplCtx.hashCode()));
                     }
+                }
 
-                    break;
+            }else if(ruleCtx==RefMLParser.RULE_variableDecl){
 
-                default:
-                    System.err.println("context containing the free variable can not be handled (rule num. " + ctxBrowser.getRuleIndex() + ")");
-                    break;
+                RefMLParser.VariableDeclContext varCtx =  (RefMLParser.VariableDeclContext) ctxBrowser;
+                // the insertion of the security functions are different whether we are in an IN statement or not
+                if(varCtx instanceof RefMLParser.VarDeclInContext){
+                    System.out.println("in var ctx");
+                    RefMLParser.VarDeclInContext varInCtx =  (RefMLParser.VarDeclInContext) varCtx;
+                    // we only need to insert the push and pop func once in a context statement
+                    // no matter hwo many external func calls are made
+                    if(editedCtx.add(varInCtx)){
+                        rewriter.insertAfter(varInCtx.statement().getStart().getTokenIndex()-1, createPushCall(varInCtx.hashCode()));
+                        rewriter.insertAfter(varInCtx.statement().getStop().getTokenIndex()+1, createPopCall(varInCtx.hashCode()));
+                    }
+                }
+                if(varCtx instanceof RefMLParser.VarDeclContext){
+                    System.out.println("simple var ctx");
+                    RefMLParser.VarDeclInContext varSimpleCtx =  (RefMLParser.VarDeclInContext) varCtx;
+                    // we only need to insert the push and pop func once in a context statement
+                    // no matter hwo many external func calls are made
+                    if(editedCtx.add(varSimpleCtx)){
+                        rewriter.insertAfter(varSimpleCtx.expr().getStart().getTokenIndex()-1, createPushCall(varSimpleCtx.hashCode()));
+                        rewriter.insertAfter(varSimpleCtx.expr().getStop().getTokenIndex()+1, createPopCall(varSimpleCtx.hashCode()));
+                    }
+                }
+
             }
+
+
+
         }
 
+    }
 
+    private String createCheckCall() {
+        return " ; checkId id" + STACK_ID_COUNTER + "";
+    }
+
+    private String createPushCall(int hash) {
+        String res = "let id" + STACK_ID_COUNTER + " = generateId () in pushId id" + STACK_ID_COUNTER + " ; ";
+        STACK_ID_COUNTER++;
+        return res;
+    }
+
+    private String createPopCall(int hash) {
+        STACK_ID_COUNTER--;
+        return " ; popId () ";
     }
 }

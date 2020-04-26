@@ -1,6 +1,6 @@
 let a = ref 1 in
    let b = ref 1 in
-   let fibo n ->
+   let fibo n =
      if n = 0 then ()
      else
        let t = !b in

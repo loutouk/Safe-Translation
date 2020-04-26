@@ -8,5 +8,5 @@
  ***/
 /** Represents a variable definition (name,type) in symbol table */
 public class VariableSymbol extends Symbol {
-    public VariableSymbol(String name) { super(name); }
+    public VariableSymbol(String name, Type.SymbolType type) { super(name, type); }
 }

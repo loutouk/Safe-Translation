@@ -1,6 +1,6 @@
-let isPrime n ->
-    let auxA a ->
-      let auxB b ->
+let isPrime n =
+    let auxA a =
+      let auxB b =
         if b = n then FALSE
         else if (a * b) = n then
           TRUE
@@ -15,7 +15,7 @@ let isPrime n ->
     in
     auxA 2
   in
-  let nextPrime n ->
+  let nextPrime n =
     if isPrime n then n else nextPrime (n+1)
   in
   nextPrime 3000
