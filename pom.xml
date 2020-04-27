@@ -48,6 +48,7 @@
                     <source>6</source>
                     <target>6</target>
                 </configuration>
+                <version>3.6.0</version>
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
