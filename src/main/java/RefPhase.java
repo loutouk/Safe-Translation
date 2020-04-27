@@ -110,7 +110,6 @@ public class RefPhase extends RefMLBaseListener {
                 }
 
                 if(!backtrackDone){
-                    System.out.println(ctxBrowser.getText() + " " + ctxBrowser.getRuleIndex());
                     ctxBrowser = ctxBrowser.getParent();
                 }
 
@@ -132,21 +131,19 @@ public class RefPhase extends RefMLBaseListener {
 
                     if(funInCtx.IN().getSymbol().getStartIndex()<callPos){
                         if(editedCtx.add(funInCtx.statement(1))) {
-                            System.out.println("in fun ctx after in");
                             rewriter.insertAfter(funInCtx.statement(1).getStart().getTokenIndex()-1, createPushCall(funInCtx.statement(1).hashCode()));
                             rewriter.insertAfter(funInCtx.statement(1).getStop().getTokenIndex()+1, createPopCall(funInCtx.statement(1).hashCode()));
                         }
                     }else{
                         if(editedCtx.add(funInCtx.statement(0))) {
-                            System.out.println("in fun ctx before in");
                             rewriter.insertAfter(funInCtx.statement(0).getStart().getTokenIndex()-1, createPushCall(funInCtx.statement(0).hashCode()));
                             rewriter.insertAfter(funInCtx.statement(0).getStop().getTokenIndex()+1, createPopCall(funInCtx.statement(0).hashCode()));
                         }
                     }
 
                 }
+
                 if(funCtx instanceof RefMLParser.FunDeclContext){
-                    System.out.println("simple fun ctx");
                     RefMLParser.FunDeclContext funSimplCtx =  (RefMLParser.FunDeclContext) funCtx;
                     // we only need to insert the push and pop func once in a context statement
                     // no matter hwo many external func calls are made
@@ -161,7 +158,6 @@ public class RefPhase extends RefMLBaseListener {
                 RefMLParser.VariableDeclContext varCtx =  (RefMLParser.VariableDeclContext) ctxBrowser;
                 // the insertion of the security functions are different whether we are in an IN statement or not
                 if(varCtx instanceof RefMLParser.VarDeclInContext){
-                    System.out.println("in var ctx");
                     RefMLParser.VarDeclInContext varInCtx =  (RefMLParser.VarDeclInContext) varCtx;
                     // we only need to insert the push and pop func once in a context statement
                     // no matter hwo many external func calls are made
@@ -171,7 +167,6 @@ public class RefPhase extends RefMLBaseListener {
                     }
                 }
                 if(varCtx instanceof RefMLParser.VarDeclContext){
-                    System.out.println("simple var ctx");
                     RefMLParser.VarDeclInContext varSimpleCtx =  (RefMLParser.VarDeclInContext) varCtx;
                     // we only need to insert the push and pop func once in a context statement
                     // no matter hwo many external func calls are made
@@ -182,7 +177,6 @@ public class RefPhase extends RefMLBaseListener {
                 }
 
             }
-
 
 
         }

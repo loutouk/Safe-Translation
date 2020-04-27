@@ -1,0 +1,22 @@
+let is_prime n =
+    (* ceci est un très mauvais test de primalité *)
+    let rec aux1 a =
+      let rec aux2 b =
+        if b = n then false
+        else if (a * b) = n then
+          true
+        else
+          aux2 (b+1)
+      in
+      if a = n then true else
+      if aux2 a then
+        false
+      else
+        aux1 (a+1)
+    in
+    aux1 2
+  in
+  let rec next_prime n =
+    if is_prime n then n else next_prime (n+1)
+  in
+  next_prime 3000

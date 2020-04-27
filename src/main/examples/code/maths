@@ -1,0 +1,10 @@
+let rec plus n m =
+     if n = 0 then m else (plus (n - 1) m) + 1
+   in
+   let rec mult n m =
+     if n = 0 then 0 else plus (mult (n - 1) m) m
+   in
+   let rec power n m =
+     if m = 0 then 1 else mult n (power n (m - 1))
+   in
+   power 2 12

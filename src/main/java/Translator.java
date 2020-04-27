@@ -28,7 +28,7 @@ public class Translator {
     }
 
     public void process(String[] args) throws Exception {
-        String inputFile = "src/main/examples/fiboFolder/fiboVulnerable";
+        String inputFile = "src/main/examples/example";
         //String inputFile = null;
         if ( args.length>0 ) inputFile = args[0];
         InputStream is = System.in;
@@ -53,7 +53,7 @@ public class Translator {
         walker.walk(ref, tree);
 
         // print back ALTERED stream
-        System.out.println("\nTranslation:\n\n"+ref.getRewriter().getText());
+        System.out.println("\nTranslation:\n"+ref.getRewriter().getText());
     }
 
     public static void main(String[] args) throws Exception {

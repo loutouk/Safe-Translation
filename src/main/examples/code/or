@@ -1,0 +1,4 @@
+let or a b = if a then true else b in
+   let rec fibo n =
+      if or (n = 0) (n = 1) then 1 else (fibo (n - 1)) + (fibo (n - 2))
+   in fibo 25

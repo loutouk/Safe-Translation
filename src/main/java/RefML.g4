@@ -6,27 +6,27 @@ declarations: variableDecl
     | functionDecl
     ;
 
-variableDecl:    LET ID EQUAL REF? expr     #varDecl
-    | LET ID EQUAL REF? expr IN statement   #varDeclIn
+variableDecl:    LET ID EQUAL REF? expr     # VarDecl
+    | LET ID EQUAL REF? expr IN statement   # VarDeclIn
     ;
 
-functionDecl: LET REC? ID formalParameters? EQUAL statement         #funDecl
-    | LET REC? ID formalParameters? EQUAL statement IN statement    #funDeclIn
+functionDecl: LET REC? ID formalParameters? EQUAL statement         # FunDecl
+    | LET REC? ID formalParameters? EQUAL statement IN statement    # FunDeclIn
     ;
 
 formalParameters: formalParameter (formalParameter)* ;
 
 formalParameter: ID ;
 
-statement : statement SEQ statement                   # SeqStat
+statement : statement SEQ statement             # SeqStat
     | expr                                      # ExprSta
-    | declarations                                   # VarStat
+    | declarations                              # VarStat
     | IF expr THEN statement (ELSE statement)?  # IfStat
     ;
 
-argList : expr (expr)*;   // arg list
+argList : expr (expr)*;
 
-expr: BANG expr              # Bang
+expr: BANG expr                # Bang
     |   expr TIMES expr        # Mult
     |   expr PLUS expr         # Add
     |   expr MINUS expr        # Sub
@@ -37,12 +37,6 @@ expr: BANG expr              # Bang
     |   ID                     # Var
     |   LPAR expr RPAR         # Parenthesis
     |   consts                 # Constant
-    |   POP BANG? ID           # ListPopId
-    |   POP list               # ListPopList
-    |   PEEK BANG? ID          # ListPeekId
-    |   PEEK list              # ListPeekList
-    |   expr PUSH BANG? ID     # ListPushId
-    |   expr PUSH list         # ListPushList
     |   ID argList             # Call
     ;
 
@@ -89,9 +83,6 @@ IF     : 'if' ;
 THEN   : 'then' ;
 ELSE   : 'else' ;
 COMMA  : ',' ;
-POP    : 'pop' ;
-PEEK   : 'peek' ;
-PUSH   : '::' ;
 
 ID     :   LETTER (LETTER | [0-9])* ;
 
