@@ -1,5 +1,25 @@
 # Safe-Translation
 
+## Linux ANTLR runtime setup
+
+`cd /usr/local/lib`
+
+`curl -O http://www.antlr.org/download/antlr-4.8-complete.jar`
+
+`export CLASSPATH=".:/usr/local/lib/antlr-4.8-complete.jar:$CLASSPATH"`
+
+## Windows ANTLR runtime setup
+
+Download http://www.antlr.org/download/antlr-4.8-complete.jar
+
+Create a folder in C drive and name it `Javalib`
+
+Move the jar inside
+
+Add the jar location to the `CLASSPATH` environment variable
+
+Create the `CLASSPATH` if it does not exist 
+
 ## Build instructions
 
 `git clone https://github.com/loutouk/Safe-Translation.git`
