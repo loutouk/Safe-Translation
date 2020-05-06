@@ -1,10 +1,13 @@
 let a = ref 1 in
    let b = ref 1 in
-   let rec fibo n =
+   let rec fibo n f =
+     f() ;
      if n = 0 then ()
      else
+       (* f() ; *)
        let t = !b in
+       f() ;
        b := !a + !b;
        a := t;
-       fibo (n - 1)
-   in fibo 29; !a
+       fibo (n - 1) f
+   in fibo 8 extFunc; !a

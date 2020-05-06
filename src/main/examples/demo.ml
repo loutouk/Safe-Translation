@@ -23,8 +23,8 @@ let checkId localId =
 let test_vulnerable f =
    let x = ref 0 in x := 0; f (); x := 1; f (); !x;;
 
-let test_translated f = let x = ref 0 in let id1 = 
-   generateId () in pushId id1 ; x := 0; f () ; checkId id1; x := 1; f () ; checkId id1; !x ; popId () ;;
+let test_translated f = let x = ref 0 in let return_stat = let id1 = generateId () in pushId id1 ;
+        x := 0; f () ; checkId id1 ; x := 1 ; f () ; checkId id1; !x in popId () ; return_stat
 
 let opposant () =
    let c = ref 0 in

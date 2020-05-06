@@ -122,6 +122,7 @@ public class RefPhase extends RefMLBaseListener {
 
             if(ruleCtx==RefMLParser.RULE_functionDecl){
 
+
                 RefMLParser.FunctionDeclContext funCtx =  (RefMLParser.FunctionDeclContext) ctxBrowser;
                 // the insertion of the security functions are different whether we are in an IN statement or not
                 if(funCtx instanceof RefMLParser.FunDeclInContext){
@@ -135,6 +136,7 @@ public class RefPhase extends RefMLBaseListener {
                             rewriter.insertAfter(funInCtx.statement(1).getStop().getTokenIndex()+1, createPopCall(funInCtx.statement(1).hashCode()));
                         }
                     }else{
+                        System.out.println(funInCtx.statement(0).getText());
                         if(editedCtx.add(funInCtx.statement(0))) {
                             rewriter.insertAfter(funInCtx.statement(0).getStart().getTokenIndex()-1, createPushCall(funInCtx.statement(0).hashCode()));
                             rewriter.insertAfter(funInCtx.statement(0).getStop().getTokenIndex()+1, createPopCall(funInCtx.statement(0).hashCode()));
@@ -188,13 +190,13 @@ public class RefPhase extends RefMLBaseListener {
     }
 
     private String createPushCall(int hash) {
-        String res = "let id" + STACK_ID_COUNTER + " = generateId () in pushId id" + STACK_ID_COUNTER + " ; ";
+        String res = "let return_stat = let id" + STACK_ID_COUNTER + " = generateId () in pushId id" + STACK_ID_COUNTER + " ; ";
         STACK_ID_COUNTER++;
         return res;
     }
 
     private String createPopCall(int hash) {
         STACK_ID_COUNTER--;
-        return " ; popId () ";
+        return " in popId () ; return_stat ";
     }
 }

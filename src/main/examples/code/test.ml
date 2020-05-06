@@ -1,0 +1,1 @@
+let test_vulnerable = let x = ref 0 in x := 0; f () ; x := 1 ; f (); !x
