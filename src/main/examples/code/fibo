@@ -1,7 +1,6 @@
 let a = ref 1 in
    let b = ref 1 in
    let rec fibo n f =
-     f() ;
      if n = 0 then ()
      else
        (* f() ; *)
