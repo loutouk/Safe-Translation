@@ -28,7 +28,7 @@ public class Translator {
     }
 
     public void process(String[] args) throws Exception {
-        String inputFile = "src/main/examples/code/test.ml";
+        String inputFile = "src/main/examples/code/example";
         //String inputFile = null;
         if ( args.length>0 ) inputFile = args[0];
         InputStream is = System.in;
