@@ -22,7 +22,7 @@
 
 2. Create a folder (or use an existing one) in C drive named `Javalib` and move the jar inside
 
-3. Add antlr4-complete.jar to CLASSPATH, either:
+3. Add `antlr4-complete.jar` to `CLASSPATH`, either:
     1. Permanently: Using System Properties dialog > Environment variables > Create or append to `CLASSPATH` variable
     2. Temporarily, at command line: `SET CLASSPATH=.;C:\Javalib\antlr4-complete.jar;%CLASSPATH%`
 
