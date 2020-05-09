@@ -37,8 +37,8 @@ Create the `CLASSPATH` if it does not exist
 The test_vulnerable function will not behave properly when used with the opponent function. We can use the Translator program to translate the test_vulnerable function so that the Ocaml program detects and prevents the vulnerability resulting of the use of the exception in the opponent function.
 
 ```ocaml
-let test_vulnerable f =
-   let x = ref 0 in x := 0; f (); x := 1; f (); !x;;
+let test_vulnerable f = let x = ref 0 in 
+    x := 0 ; f () ; x := 1 ; f () ; !x ;;
 
 let opponent () =
    let c = ref 0 in
@@ -77,9 +77,11 @@ let checkId localId =
    | hd::_ -> if hd != localId then failwith "Error, stack id mismatch!"
    end
    
+
 let test_translated f = let x = ref 0 in 
-	let id1 = generateId () in pushId id1 ; 
-	x := 0; f () ; checkId id1; x := 1; f () ; checkId id1; !x ; popId () ;;
+    let return_stat1 = let id1 = generateId () in 
+    pushId id1 ; x := 0 ; f () ; checkId id1 ; x := 1 ; f () ; checkId id1 ; !x in 
+    popId () ; return_stat1 ;;
 
 let opponent () =
    let c = ref 0 in
