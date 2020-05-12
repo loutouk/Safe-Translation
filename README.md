@@ -1,24 +1,31 @@
 # Safe-Translation
 
+## OS X ANTLR runtime setup
+
+`cd /usr/local/lib`
+
+`sudo curl -O https://www.antlr.org/download/antlr-4.8-complete.jar`
+
+`export CLASSPATH=".:/usr/local/lib/antlr-4.8-complete.jar:$CLASSPATH"`
+
 ## Linux ANTLR runtime setup
 
 `cd /usr/local/lib`
 
-`curl -O http://www.antlr.org/download/antlr-4.8-complete.jar`
+`wget https://www.antlr.org/download/antlr-4.8-complete.jar`
 
 `export CLASSPATH=".:/usr/local/lib/antlr-4.8-complete.jar:$CLASSPATH"`
 
 ## Windows ANTLR runtime setup
 
-Download http://www.antlr.org/download/antlr-4.8-complete.jar
+1. Download http://www.antlr.org/download/antlr-4.8-complete.jar
 
-Create a folder in C drive and name it `Javalib`
+2. Create a folder (or use an existing one) in C drive named `Javalib` and move the jar inside
 
-Move the jar inside
+3. Add `antlr4-complete.jar` to `CLASSPATH`, either:
+    1. Permanently: Using System Properties dialog > Environment variables > Create or append to `CLASSPATH` variable
+    2. Temporarily, at command line: `SET CLASSPATH=.;C:\Javalib\antlr4-complete.jar;%CLASSPATH%`
 
-Add the jar location to the `CLASSPATH` environment variable
-
-Create the `CLASSPATH` if it does not exist 
 
 ## Build instructions
 
