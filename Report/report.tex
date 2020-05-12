@@ -1,0 +1,570 @@
+
+\documentclass[11pt, a4paper, notitlepage]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{fancyhdr}
+\usepackage{titling}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage[hyphens]{url}
+\usepackage{subcaption}
+\usepackage{amsmath, amssymb, stmaryrd}
+\usepackage{amsfonts}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{listings}
+
+\pagestyle{fancy}
+
+\renewcommand{\headrulewidth}{1pt}
+\fancyhead[L]{\textit{MP:X2II110}}
+\fancyhead[R]{\textit{TER}}
+
+\renewcommand{\footrulewidth}{1pt}
+\fancyfoot[C]{}
+\fancyfoot[R]{page \thepage}
+
+\newcommand\sep{\vspace*{3mm} \hrule \vspace*{3mm}}
+\newcommand\tab{{\hspace*{12.5mm}}}
+\setlength\parindent{0pt}
+
+\lstset{
+   extendedchars=true,
+   basicstyle=\scriptsize,
+   literate=%
+   {é}{{\'e}}{1}%
+   {è}{{\`e}}{1}%
+   {ê}{{\^e}}{1}%
+   {à}{{\`a}}{1}%
+}
+
+\begin{document}
+
+\begin{center}
+   \huge\textbf{Research Project}\\
+   \vspace*{3mm}
+   \large\textit{Enseignant : JABER Guilhem}\\
+   \large\textit{FILAUDEAU Éloi, BOURSIER Louis, LASHERME Loïc}
+\end{center}
+\vspace*{2mm}
+
+\section{Introduction}
+\tab En informatique, il est fréquent de faire appel à des fonctions proposées par des bibliothèques afin de déléguer une partie du travail de programmation. Ce faisant, le programme devient un programme ouvert dans le sens où il est maintenant lié à un environnement qui lui fournit les fonctions dont il a besoin. À ce moment là, des problèmes de sécurité peuvent survenir, dus notamment au fait que le langage utilisé dans la bibliothèque peut ne pas préserver les abstractions du langage source, ou bien fournir des abstractions différentes. On parle alors d’environnement malicieux.\\
+\tab Afin de préserver les abstractions de nos programmes contre l'environnement malicieux, nous pouvons mettre en place des sécurités. Ces sécurités permettent de préserver les abstractions du langage comme cité précédemment. Une abstraction peut être la préservation de la visibilité d'une variable de classe en Java. C'est-à-dire empêcher l'environnement de pouvoir lire une variable déclarée comme privé.\\
+\tab Pour comprendre la suite, il faut s'intéresser à la définition de l'équivalence contextuelle. Le fait que deux programmes soient contextuellement équivalent signifie qu'ils implémentent la même signature, et qu'aucun programme tiers ne peut les distinguer.\\
+\tab Pour répondre à ce problème, on peut utiliser un compilateur sécurisé. Un critère définissant si un compilateur est sécurisé ou non est la compilation \textit{fully abstract}. Un compilateur \textit{fully abstract} assure que deux programmes contextuellement équivalent dans un langage source le sont aussi dans un langage destination, et que donc les propriétés d’abstractions sont préservées. Cela a pour conséquence qu’aucun contexte ne peut distinguer un programme de l’autre en essayant de leur faire produire des comportements \textit{input/output} différents. On dit aussi qu’on observe le même \textit{control flow} pour les deux programmes.\\
+\tab \textit{Formally, a fully-abstract compiler preserves and reflects observational equivalence (usually contextual equivalence) between source and target programs. Reflection of observational equivalence means that the compiler outputs target-level components that behave as their source-level counterparts, this is generally a consequence of the compiler being correct. Preservation of observational equivalence implies that the source-level abstractions in the generated target-level output are not violated by a target-level client$^{[3]}$.}\\
+\tab Nous définissons une traduction de notre langage source vers le langage enrichi avec les exceptions. Cette traduction préserve l’équivalence contextuelle du langage source. Nous aurons alors la garantie de préserver les abstractions du langage source. Ainsi, la traduction n'introduit pas de nouvelles vulnérabilités. Cependant, elle ne pourra pas non plus enlever celles qui pourraient être présentes dans le langage source. Nous utiliserons des modèles dénotationnels \textit{fully abstract} utilisant la sémantique des traces pour montrer l’équivalence dans le modèle $\llbracket t_1 \rrbracket = \llbracket t_2 \rrbracket$ et donc l’équivalence dans les programmes $t_1 \simeq_{ctx} t_2$.
+
+\section{Méthodologie}
+\subsection{Syntaxe de notre langage}
+\tab Dans un premier temps, nous devons créer notre petit langage de programmation ressemblant fortement à Mini-ML, et inspiré de celui de Pierce$^{[1]}$, afin de raisonner sur notre problème. De plus, nous voulons pouvoir avoir accès aux exceptions pour pouvoir appliquer notre transformation. La syntaxe de notre langage est donc la suivante :
+
+\begin{center}
+   \begin{tabular}{|llr|}
+      \hline
+      & &\\
+      $v ::=$ & & valeurs:\\
+      & $true$ & constante true\\
+      & $false$ & constante false\\
+      & $()$ & constante unit\\
+      & $n$ & avec $n \in \mathbb{Z}$\\
+      & $x$ & avec $x \in$ variables\\
+      & fun $x \mapsto t$ &\\
+      & fix $f(x) \mapsto t$ & avec $f \in$ variables\\
+      & &\\
+      \hline
+   \end{tabular}
+   \begin{tabular}{|llr|}
+      \hline
+      & &\\
+      $t ::=$ & & termes:\\
+      & $v$ &\\
+      & $t \circ t'$ & $\circ \in \{+, -, \times, \div\}$\\
+      & $t = t'$ & égalité\\
+      & $t$ $t'$ & application\\
+      & if $t$ then $t'$ else $t''$ & conditionnelle\\
+      & try $t$ with $t'$ & exception\\
+      & $error$ & erreur\\
+      & $\text{let }t_1 = t_2 \text{ in } t_3$ & sucre syntaxique\\
+      & &\\
+      \hline
+   \end{tabular}
+\end{center}
+
+\begin{center}
+   \begin{tabular}{|llr|}
+      \hline
+      & &\\
+      $T ::=$ & & types:\\
+      & $Unit$ & type unit\\
+      & $Bool$ & type booléan\\
+      & $Int$ & type entier\\
+      & $T \to T'$ &\\
+      & &\\
+      \hline
+   \end{tabular}
+   \begin{tabular}{|llr|}
+      \hline
+      & &\\
+      $E ::=$ & & contexte d'évaluation :\\
+      & $\bullet$ $t$ &\\
+      & $v$ $\bullet$ &\\
+      & $\bullet + t$ &\\
+      & $v + \bullet$ &\\
+      & if $\bullet$ then $t$ else $t'$ &\\
+      & try $\bullet$ with $t$ &\\
+      & &\\
+      \hline
+\end{tabular}
+\end{center}
+
+\subsection{Sémantique de notre langage}
+\tab Une fois notre syntaxe déclarée, il faut pouvoir y rajouter du sens. Pour cela, nous définissons notre sémantique de la manière suivante :
+
+\begin{center}
+   \renewcommand{\arraystretch}{2}
+   \begin{tabular}{|lcp{0.5\textwidth}|}
+      \hline
+      & &\\[-5mm]
+      & $\dfrac{t_1 \xrightarrow{*} true}{\text{if } t_1 \text{ then } t_2 \text{ else } t_3 \to t_2}$ & Si la condition $t_1$ se réduit à $true$ alors on évalue $t_2$.\\
+      & $\dfrac{t_1 \xrightarrow{*} false}{\text{if } t_1 \text{ then } t_2 \text{ else } t_3 \to t_3}$ & Si la condition $t_1$ se réduit à $false$ alors on évalue $t_3$.\\
+      & $\dfrac{}{\text{try } v \text{ with } t \to v}$ & Si aucune $error$ n'est remontée dans le try, alors on évalue seulement la valeur v.\\
+      & $\dfrac{t_1 \xrightarrow{*} error}{\text{try } t_1 \text{ with } t_2 \to t_2}$ & Si la condition $t_1$ renvoie une $error$ alors on évalue $t_2$.\\
+      & $\dfrac{}{(\text{fun  }x \mapsto t)v \to t\{v/x\}}$ & On évalue d'abord l'argument passé à la fonction avant de l'appliquer : c'est un appel par valeur différent de l'appel par nom.\\
+      & $\dfrac{u = \text{fix }f(x) \mapsto M \qquad u \; v \to M \{v/x\}\{u/f\}}{E[u \; v] \to E[M \{v/x\}\{u/f\}]}$& La règle d'évaluation du point fixe.\\
+      & $\dfrac{t \to t'}{E[t] \to E[t']}$ & Si un terme $t$ se réduit vers un autre terme $t'$, alors ce même terme se réduit de la même façon dans le contexte.\\[5mm]
+      \hline
+   \end{tabular}
+   \renewcommand{\arraystretch}{1}
+\end{center}
+\newpage
+\tab À ceci, nous rajoutons les règles de typages de notre langage :
+
+\begin{center}
+   \renewcommand{\arraystretch}{2}
+   \begin{tabular}{|lcp{0.5\textwidth}|}
+      \hline
+      & &\\[-5mm]
+      & $\dfrac{}{\Gamma \vdash true : Bool}$ & On évalue $true$ au type $Bool$.\\
+      & $\dfrac{}{\Gamma \vdash false : Bool}$ & On évalue $false$ au type $Bool$.\\
+      & $\dfrac{}{\Gamma \vdash () : Unit}$ & On évalue $()$ au type $Unit$.\\
+      & $\dfrac{}{\Gamma \vdash n : Int}$ & On évalue $n \in \mathbb{Z}$ au type $Int$.\\
+      & $\dfrac{}{\Gamma \vdash error : T}$ & On évalue $error$ en un type $T$.\\
+      & $\dfrac{x : T \in \Gamma}{\Gamma \vdash x : T}$ & Si la variable $x$ de type $T$ appartient au tas, alors son évaluation renvoie $T$.\\
+      & $\dfrac{\Gamma \vdash t : Bool \qquad \Gamma \vdash t_1 : T \qquad \Gamma \vdash t_2 : T}{\Gamma \vdash \text{if } t \text{ then } t_1 \text{ else } t_2 : T}$ & Dans une conditionnelle, le premier terme doit s'évaluer sur le type $Bool$ et les deux autres sur le même type T.\\
+      & $\dfrac{\Gamma \vdash t : T \qquad \Gamma \vdash t' : T}{\Gamma \vdash \text{try } t \text{ with } t' : T}$ & Les deux termes d'une exception doivent s'évaluer sur le même type T.\\
+      & $\dfrac{\Gamma, x : T \vdash t : U}{\Gamma \vdash \text{fun } x \mapsto t : T \to U}$ &\\
+      & $\dfrac{\Gamma, x : T, f : T \to U \vdash t : U}{\Gamma \vdash \text{fix } f(x) \mapsto t : T \to U}$ &\\
+      & $\dfrac{\Gamma \vdash t : T \to U \qquad \Gamma \vdash t' : T}{\Gamma \vdash t \text{ } t' : U}$ & Si un terme $t$ se réduit de $T$ en $U$ et que l'on lui applique un terme $t'$ de type $T$, alors le résultat de cette application est de type $U$.\\[5mm]
+      \hline
+   \end{tabular}
+   \renewcommand{\arraystretch}{1}
+\end{center}
+
+\subsection{Les énoncés}
+
+\subsubsection{Les interprétations d'un terme $t$}
+
+\tab Soit $t$ un terme tel qu'il existe $\Gamma$ et $T$ avec $\Gamma \vdash t : T$ et toutes les variables de $\Gamma$ sont de type $B \to B$. Alors :\\
+(Avec $B ::= Unit \, | \, Bool \, | \, Int$)
+\begin{itemize}[label=*]
+   \item Soit t diverge
+   \item Soit il existe une valeur $v$ tel que : $t \xrightarrow{*} v$ et $\Gamma \vdash v : T$
+   \item Soit il existe $E, f, v$ tel que : $t \xrightarrow{*} E[fv]$ avec $f$ une variable libre
+\end{itemize}
+
+\subsubsection{Définition équivalence contextuelle/observationelle}
+$\Gamma \vdash t_1, t_2 : T$\\
+$\Gamma \vdash t_1 \simeq_{ctx} t_2$ ssi pour tout contexte $E$ tel que :
+\begin{enumerate}[label=$^{(\arabic*)}$]
+   \item $x:T \vdash C[x] : Bool,$ \qquad $C[t_1] \xrightarrow{*} true$ ssi $C[t_2] \xrightarrow{*} true$
+   \item $x:T \vdash C[x] : Unit,$ \qquad $C[t_1] \xrightarrow{*} ()$ ssi $C[t_2] \xrightarrow{*} ()$
+\end{enumerate}
+$^{(1) \; \Rightarrow \; (2)}$ $x:T \vdash C[x] : Bool \leadsto C' =$ if $C$ then $()$ else $\Omega$\\
+$^{(2) \; \Rightarrow \; (1)}$ $x:T \vdash C[x] : Unit \leadsto C' =  C; true$ \qquad $C'_n =$ if $C = n$ then $()$ else $\Omega$\\
+Avec $\Omega$ symbole pour la divergence.
+
+\subsubsection{Définition du théorème de transformation}
+\tab La transformation de programme :\\
+Soit $( . )^*$ la transformation de programme. Avec $( . )^*:L \to L$\\
+$L \subseteq L_{ex}$ nos deux langages de programmation\\
+Pour tous programmes $P_1$, $P_2$ de $L$, si $P_1 \simeq_L P_2$ alors $(P_1)^* \simeq_{L_{ex}} (P_2)^*$\\
+Soit $t_1, t_2$ deux programmes de notre langage $L$ tel que :\\
+$\Gamma \vdash t_1, t_2:T$ et $t_1 \simeq^L_{ctx} t_2$ \qquad $\llbracket t_1 \rrbracket_L = \llbracket t_2 \rrbracket_L $\\
+Alors $(t_1)^* \simeq^{L_{ex}}_{ctx} (t_2)^*$ \qquad Alors $\llbracket (t_1)^* \rrbracket_{L_{ex}} = \llbracket (t_2)^* \rrbracket_{L_{ex}}$
+
+\subsection{Quelques exemples sur des fonctions}
+\subsubsection{estPair}
+\begin{center}
+   $\text{estPair} = \text{fix } f(x) \mapsto \text{if } x = 0 \text{ then } true \text{ else }(\text{if }x - 1 = 0 \text{ then } false \text{ else }f(x - 2))$\\
+\end{center}
+
+\tab On souhaite évaluer : $\text{estPair } 3$ par rapport à un contexte, ce qui donne l'évaluation : $E[\text{estPair }3]$\\
+Avec nos règles décrites plus haut, cela nous donne cette évalution :
+\begin{itemize}[label=$\to$]
+   \item $\text{if }3 = 0 \text{ then }true \text{ else }(\text{if }2 = 0 \text{ then }false \text{ else estPair }(3 - 2))$\\
+   \item $\text{if }2 = 0 \text{ then }false \text{ else estPair }(3 - 2)$\\
+   \item $\text{estPair }(3 - 2)$\\
+   \item $\text{if }1 = 0 \text{ then }true \text{ else }(\text{if }0 = 0 \text{ then }false \text{ else estPair }(1 - 2))$\\
+   \item $false$
+\end{itemize}
+Ce qui revient à évaluer $E[false]$ dans le contexte.
+
+\subsubsection{estDiviseur}
+\begin{center}
+   $\text{estDiviseur } = \text{fix } f(x,y) \mapsto \text{if } y \leq 0 \text{ then }(\text{if }y = 0 \text{ then } true \text{ else } false) \text{ else } f(x, y-x) $\\
+\end{center}
+
+\tab Même façon de procéder que pour estPair, on souhaite évaluer : $\text{estDiviseur }3 \; 7$ dans le contexte ce qui donne : $E[\text{estDiviseur }3 \; 7]$. En réduisant on obtient :
+
+\begin{itemize}[label=$\to$]
+   \item $\text{if } 7 \leq 0 \text{ then }(\text{if } 7 = 0 \text{ then } true \text{ else } false)\text{ else estDiviseur } 3 \; (7 - 3)$\\
+   \item $\text{estDiviseur } 3 \; (7 - 3)$\\
+   \item $\text{if } 4 \leq 0 \text{ then }(\text{if } 4 = 0 \text{ then } true \text{ else } false)\text{ else estDiviseur } 3 \; (4 - 3)$\\
+   \item $\text{estDiviseur } 3 \; (4 - 3)$\\
+   \item $\text{if } 1 \leq 0 \text{ then }(\text{if } 1 = 0 \text{ then } true \text{ else } false)\text{ else estDiviseur } 3 \; (1 - 3)$\\
+   \item $\text{estDiviseur } 3 \; (1 - 3)$\\
+   \item $\text{if } -2 \leq 0 \text{ then }(\text{if } -2 = 0 \text{ then } true \text{ else } false)\text{ else estDiviseur } 3 \; (-2 - 3)$\\
+   \item $false$
+\end{itemize}
+Ce qui revient de nouveau à évaluer $E[false]$ dans le contexte.
+
+\section{Résultats}
+\subsection{Exemple de transformation de programme en Ocaml}
+\tab Dans notre exemple, nous voulons préserver l'équivalence contextuelle des fonctions \textit{fonction\_test\_bis} et \textit{fonction\_test}. Les deux fonctions renvoient l'entier 1. Avant de renvoyer l'entier, les deux fonctions ont deux appels réentrants. \textit{fonction\_test\_bis} exécute seulement ses deux appels, puis renvoie 1.  \textit{fonction\_test} renvoie la valeur de la référence à x à la fin de la fonction, et entre chaque appel réentrant, modifie la valeur de la référence. Pour préserver l'équivalence, il faut que les deux fonctions puissent renvoyer la même sortie en toute circonstance. Malheureusement, ce n'est pas le cas. En effet, \textit{fonction\_environnement} qui représente une fonction de l'environnement, prend en paramètre une autre fonction et l'exécute. En passant nos deux fonctions en paramètre, ces deux mêmes fonctions ne renvoient pas la même sortie. \textit{fonction\_test\_bis} renvoie bien 1 comme souhaité, mais \textit{fonction\_test} renvoie 0. Ce problème apparaît à cause de \textit{fonction\_environnement}, qui compte le nombre d'appel réentrant et renvoie une erreur lorsque qu'il y en a déjà eu un. De plus, \textit{fonction\_test} renvoie une référence, qui est modifiée entre chaque appel. Ainsi, l'erreur provoquée par \textit{fonction\_environnement} ne prend pas en compte la modification de la référence et la laisse à 0. Donc, en l'état, nos deux fonctions ne sont pas contextuellement équivalentes. \\
+\tab Pour permettre de préserver l'équivalence, nous avons mis au point une transformation. Celle-ci consiste à créer une pile d'identifiants inaccessible par l'environnement. Pour protéger notre fonction, nous établissons un identifiant à l'intérieur de celle-ci que nous empilons sur notre pile. À la fin de chaque appel réentrant, nous vérifions que l'identifiant en tête de pile est bien le même que celui de notre fonction. Si c'est le cas, nous continuons, sinon, nous provoquons une erreur, car l'environnement essaye de différencier notre fonction. À la fin de notre fonction, nous supprimons l'identifiant en tête de notre pile. Grâce à cette transformation, il nous est possible de garder l'équivalence de \textit{fonction\_test} et de \textit{fonction\_test\_bis}.\\
+
+\sep
+\begin{lstlisting}[language=caml]
+exception Error;;
+
+let pile = ref [];;
+let id = ref 0;;
+
+(* Permet de créer un id différent à chaque appel *)
+let generate_id () =
+   let x = !id in
+      id := !id + 1;
+      x
+;;
+
+(* Permet de push l'id dans la pile *)
+let push idCourant =
+   pile := idCourant :: !pile
+;;
+
+(* Permet de supprimer l'id en tête de pile *)
+let pop () =
+   match !pile with
+      | [] -> failwith "Erreur, pile vide"
+      | hd::tl -> pile := tl
+;;
+
+(* Permet de comparer id_courant avec l'id en tête de pile *)
+let check_id id_courant =
+   match !pile with
+      | [] -> failwith "Erreur, id different"
+      | hd::_ ->  if hd != id_courant
+                  then failwith "Erreur, id différent"
+;;
+
+
+
+
+
+
+(* Fonction sans les sécurités *)
+let fonction_test =
+   let x = ref 0 in
+      fun f ->
+         x := 0;
+         f ();
+         x := 1;
+         f ();
+         !x
+;;
+
+(* Est censée être équivalente à fonction_test *)
+(* Mais ne l'est pas car l'environnement peut les distinguer *)
+let fonction_test_bis =
+   fun f ->
+            f ();
+            f ();
+            1
+;;
+
+(* Fonction avec les sécurités *)
+let fonction_test_secu =
+      let x = ref 0 in
+         fun f ->
+            let id_courant = generate_id () in
+               push id_courant;
+               x := 0;
+               f ();
+               check_id id_courant;
+               x := 1;
+               f ();
+               check_id id_courant;
+               let n = !x in
+                  pop ();
+                  n
+;;
+
+(* Fonction malicieuse fournie pas l'environnement *)
+(* N'est pas censée être présente dans le programme source *)
+(* Nous pouvons uniquement l'appeler car nous avons théoriquement load la bibliothèque auparavant *)
+let fonction_environnement f =
+   let c = ref 0 in
+   f (fun _ -> if !c = 0
+               then c := !c + 1
+               else  try   begin
+                              f(fun _ -> raise (Error));
+                              ()
+                           end
+                     with Error -> ())
+;;
+
+(* Appel de la fonction fournie par l'environnement avec nos fonctions *)
+(* Ne renvoie pas le bon résultat à cause de la fonction malicieuse de l'environnement *)
+fonction_environnement fonction_test;;
+
+(* Renvoit une erreur car l'environnement interrompt notre fonction en plein milieu*)
+fonction_environnement fonction_test_secu;;
+\end{lstlisting}
+\sep
+
+\section{Automatisation de la transformation}
+
+\subsection{Implémentation en Java}
+\begin{center}
+   \url{https://github.com/loutouk/Safe-Translation?fbclid=IwAR3VX2RZ0ay8Dt8g9gZg-7xj-hWe_dimD8fQYJjXJWNgpl0JE8uOleZW95E}
+\end{center}
+\tab Une implémentation du traducteur a été faite en Java. Ce choix est motivé par deux raisons principales. La première est que la bibliothèque \textbf{ANTLR} est disponible sur Java. La seconde est que ce langage de programmation nous est bien connu, et nous sommes donc productifs avec.\\
+\tab \textbf{ANTLR} --- \textbf{AN}other \textbf{T}ool for \textbf{L}anguage \textbf{R}ecognition --- est un compilateur de compilateur écrit par Terrence Parr. Il fonctionne avec une analyse syntaxique descendante LL(*) et prend en entrée une grammaire context-free de type \textbf{EBNF} pour produire les lexeurs et parseurs associés. Un point fort de \textbf{ANTLR} est la construction automatique des arbres syntaxiques et les outils disponibles pour explorer ces arbres. Notamment avec l'utilisation des patterns Visitor et Listener$^{[2]}$. C'est d'ailleurs le pattern Listener que nous avons utilisé pour effectuer la traduction. Son fonctionnement est similaire à celui d'un listener sur un composant d'une interface graphique: un appel est déclenché chaque fois que le composant est activé. Ici, un appel est déclenché chaque fois qu'une règle est reconnue lors de l'analyse d'un programme.\\
+\tab La première étape consiste à écrire la grammaire de notre langage. Celle-ci est largement inspirée de OCaml puisque notre langage doit pouvoir être compilé par un compilateur OCaml. Nous avons donc choisi de décrire un sous-ensemble de ce langage. Globalement, un programme est un ensemble de déclarations de variables.
+
+\begin{figure}[h]
+   \centering
+   \includegraphics[scale=0.7]{antlr4_parse_tree.png}
+\end{figure}
+
+\begin{lstlisting}[language=java]
+program:
+     (declarations)+
+;
+
+expr:
+     expr TIMES expr       # Mult
+   | expr PLUS expr        # Add
+   | expr MINUS expr       # Sub
+;
+\end{lstlisting}
+
+\tab On peut définir un listener pour chaque règle de la grammaire. Et on peut, si nécessaire, affiner la précision sur le type de noeud en générant un appel différent pour chaque variante de la règle à l'aide du \#. Une fois la grammaire compilée, \textbf{ANTLR} génère des interfaces Java contenant les listeners sur ces règles. Il suffit d'implémenter l'interface dans une classe pour pouvoir en bénéficier:
+
+\begin{lstlisting}[language=java]
+void enterMult(RefMLParser.MultContext ctx);
+
+void exitMult(RefMLParser.MultContext ctx);
+\end{lstlisting}
+
+\tab Le but de la traduction est de sécuriser les appels aux fonctions de bibliothèques externes, c'est-à-dire les variables libres. Pour ce faire, il faut tout d'abord identifier ces appels, et ensuite identifier où placer les instructions pour sécuriser chaque appel.\\
+\tab Pour identifier les appels aux fonctions externes, il faut déjà savoir identifier les appels de fonctions. Comme expliqué au dessus, cela est réalisé facilement avec \textbf{ANTLR}.\\
+\tab Il faut ensuite savoir différencier les appels aux fonctions externes des appels aux fonctions déclarées localement. Même si l'on pourrait simplement sécuriser les appels aux fonctions locales également, cela est inutile et rend le programme moins lisible et moins performant. Une solution classique consiste à créer une table des symboles qu'on remplit durant la première exploration de l'arbre syntaxique. Pour chaque portée (scope), on renseigne les fonctions et les variables qui y sont déclarées. Ainsi, lors d'une deuxième passe, nous serons capables d'identifier quels symboles sont des variables libres.\\
+\tab En OCaml et dans notre langage, la déclaration de variables est raccrochée à une portée :
+
+\begin{lstlisting}[language=caml]
+let average a b =
+   let sum = a +. b in
+      sum /. 2.0;;
+\end{lstlisting}
+
+\begin{itemize}[label=*]
+   \item $average$ a une portée globale
+   \item $a$ et $b$ ont une portée locale limitée à la fonction
+   \item $sum$ a une portée locale limitée à l'expression qui suit le mot clé in
+\end{itemize}
+\ \\
+\tab Comme notre grammaire est construite pour représenter les règles du langages, les appels déclenchés par le listener nous informe dans quel type d'expression nous sommes (déclaration de fonction, partie droite d'un in...). Ainsi, il est facile de créer une nouvelle portée pour la table des symboles quand c'est nécessaire. On y déclare les fonctions et variables qu'on rencontre dans cette portée, en maintenant la connaissance de la portée dans laquelle nous nous trouvons lors du parcours de l'arbre.
+
+\begin{lstlisting}[language=java]
+variableDecl:
+     LET ID EQUAL REF? expr         # VarDecl
+;
+
+public void exitVarDecl(RefMLParser.VarDeclContext ctx) {
+   defineVar(ctx.ID().getSymbol(), Type.SymbolType.VAR);
+}
+
+void defineVar(Token nameToken, Type.SymbolType type) {
+   VariableSymbol var = new VariableSymbol(nameToken.getText(), type);
+   currentScope.define(var); // Define symbol in current scope
+}
+
+public void define(Symbol sym) {
+   orderedArgs.put(sym.name, sym);
+   sym.scope = this; // track the scope in each symbol
+}
+\end{lstlisting}
+
+\tab Lors de la deuxième passe, lorsque l'on cherche à savoir si une variable est libre, il suffit de remonter toutes les portées, de la portée locale actuelle jusqu'à la portée globale initiale, pour trouver la variable rencontrée. Si on ne la trouve pas, c'est qu'elle n'a pas été déclarée et que c'est donc une variable libre.
+
+\begin{lstlisting}[language=java]
+expr:
+     ID argList         # Call
+;
+
+public void exitCall(RefMLParser.CallContext ctx) {
+   Symbol symbol = currentScope.resolve(ctx.ID().getText());
+   if(symbol == null) {
+      // protect
+   }
+}
+
+public Symbol resolve(String name) {
+   Symbol s = orderedArgs.get(name);
+   if (s != null) return s;
+   // if not here, check any enclosing scope
+   if (getEnclosingScope() != null) {
+      return getEnclosingScope().resolve(name);
+   }
+   return null; // not found
+}
+\end{lstlisting}
+
+\tab Maintenant que l'on sait quelles sont les variables libres, il faut savoir où placer les fonctions qui sécurisent l'appel à la fonction externe.\\
+\tab La traduction repose sur le fait de pouvoir identifier les comportements indésirables d'un programme. L'idée de base est de constater qu'un appel externe s'est bien comporté, c'est à dire qu'il a respecté les propriétés d'abstractions garanties par notre langage, en installant un mécanisme de vérification. Ce mécanisme de vérification repose sur l'analyse du flot de contrôle du programme en vérifiant que l'instruction qui devait se produire s'est bien exécutée entièrement. Cette garantie peut être mise à mal par les exceptions qui ont pour définition de rediriger le flot de contrôle vers un handler. En définissant une suite d'identifiants pour chaque portée où sont utilisées des fonctions externes, on peut vérifier que le flot de contrôle suit son bon déroulement en s'assurant que l'identifiant local correspond bien à l'identifiant global de la pile. Cet ordre doit correspondre à celui de la pile d'exécution lorsque les instructions sont exécutées entièrement. Une pile est utilisée pour conserver les identifiants globaux. Le choix d'une pile est naturel étant donné le comportement \textbf{LIFO} des appels de fonctions. Un exemple est fourni dans le rapport pour bien comprendre le mécanisme et le lien avec les exceptions.\\
+\tab Lorsque que des appels à des fonctions externes sont identifiés dans une fonction, c'est à dire dans une portée, on va protéger ces appels dans la portée qui contient ces fonctions. Pour cela, on commence par générer un identifiant local qui est simplement une incrémentation du compteur global. On ajoute ensuite cet identifiant local à la pile globale. A partir de ce moment, l'identifiant local doit être le même que celui de la pile. Sinon, c'est que le flot de contrôle a été dérouté. Etant donné que le flot ne peut être dérouté que par les appels aux fonctions externes, on vérifie cela après chaque appel de ce genre. A la fin de la portée, on fait sauter le premier identifiant, l'identifiant courant, de la pile. Cela représente le fait que l'on a changé de portée, et que les appels aux fonctions externes doivent maintenant déboucher sur un état mémoire de la pile qui correspond à cette nouvelle portée.
+
+\begin{lstlisting}[language=caml]
+let test f =
+   let x = ref 0 in
+      x := 0;
+      f ();
+      x := 1;
+      f ();
+      !x
+
+let test f =
+   let x = ref 0 in
+      let id = generateId () in
+         pushId id;
+         x := 0;
+         f ();
+         checkId id;
+         x := 1;
+         f ();
+         checkId id;
+         !x;
+         popId ()
+\end{lstlisting}
+
+\tab Cette première traduction peut générer une erreur lors de la compilation. En effet, popId() retourne un type unit, ce qui pose problème lorsque que la fonction courante retourne un autre type. Pour cela, on utilise une construction avec le mot clé in pour stocker le résultat de la fonction courante et le retourner après avoir utilisé popId(). Ainsi, on préserve le type de retour de la fonction courante :
+
+\begin{lstlisting}[language=caml]
+let test f =
+   let x = ref 0 in
+      let return_stat =
+         let id = generateId () in
+            pushId id ;
+            x := 0;
+            f ();
+            checkId id ;
+            x := 1;
+            f ();
+            checkId id;
+            !x in
+               popId ();
+               return_stat
+\end{lstlisting}
+
+\tab Il faut également prendre en compte que plusieurs portées peuvent contenir des appels à des fonctions externes. Il faut donc générer des noms de variables différents et non ambigus :
+\newpage
+\begin{lstlisting}[language=caml]
+let test f =
+   let x = ref 0 in
+      let return_stat1 = let id1 = generateId () in
+         pushId id1;
+         x := 0;
+         f ();
+         checkId id1;
+         x := 1;
+         f ();
+         checkId id1;
+         !x in
+            popId ();
+            return_stat1
+\end{lstlisting}
+
+\tab La déclaration des fonctions popId(), pushId, checkId et generateId() sont insérées au début du programme. Le programme est ensuite traduit, et on retourne le résultat.\\
+\tab L'écriture de la traduction se fait avec l'objet TokenStreamRewriter, qui permet de modifier directement le flux de token lu par le parseur :
+
+\begin{lstlisting}[language=java]
+CharStream input = new ANTLRFileStream("input");
+TLexer lex = new TLexer(input);
+CommonTokenStream tokens = new CommonTokenStream(lex);
+T parser = new T(tokens);
+TokenStreamRewriter rewriter = new TokenStreamRewriter(tokens);
+parser.startRule();
+\end{lstlisting}
+
+\tab On peut ensuite modifier le flux de token dans les appels de listener :
+
+\begin{lstlisting}[language=java]
+private static final String INIT_PILE = "let stack = ref [] ;\n";
+
+public void enterProgram(RefMLParser.ProgramContext ctx) {
+   rewriter.insertAfter(ctx.start.getStartIndex()-1, INIT_PILE);
+}
+\end{lstlisting}
+
+\subsection{Implémentation en OCaml}
+\begin{center}
+   \url{https://gitlab.com/lo.lasherme/compilateur-cameuuuuule/-/tree/master}
+\end{center}
+
+\tab L'objectif de cette implémentation est le même que celle en Java. Malheureusement, par manque de temps, elle n'a pas pu être achevée. Elle peut néanmoins repérer les fonctions à transformer et ajouter la fonction pushId et popId. Pour continuer, il faudrait ajouter le repérage des appels de fonction externe à l'intérieur des fonctions à transformer et faire l'ajout du checkId ; ajouter tous les en-têtes de notre tranformation --- la définition des fonctions popId, pushId, etc..., notre référence de pile et notre référence d'identifiant.\\
+\tab Pour cette implémentation nous avons utilisé ocamllex et ocamlyacc afin de pouvoir définir notre syntaxe et notre sémantique. Une fois cela réalisé, nous obtenons un arbre de syntaxe sur lequel nous allons baser tout notre raisonnement. Nous le parcourons une première fois à l'aide de la fonction $check_ast_bis$. Une fois ce parcours réalisé, nous stockons les sous-fonctions de notre programme à transformer dans une liste. Ensuite à l'aide de $transformation$ nous reconstruisons l'arbre avec l'ajout de noeud qui permettent la transformation. Enfin, nous l'affichons à l'aide de la fonction "affiche".\\
+\tab Voici un exemple de ce que le programme peut réaliser comme pseudo-transformation :
+\begin{lstlisting}[language=caml]
+let test_1 = 0 in
+	let test_2 a = a + 2 in
+		let test_3 = fun f -> f() in
+			extern test_2 test_3 test_1
+
+let test_1 = 0 in
+   let test_2 a =
+      push id_0;
+      a + 2;
+      pop () in
+         let test_3 =
+            push id_1;
+            fun f -> f ();
+            pop () in
+               extern test_2 test_3 test_1
+\end{lstlisting}
+
+
+
+\section{Conclusion}
+\tab Pour réaliser au mieux ce projet d'initiation à la recherche, nous avons dû dans un premier temps passer par une phase de découverte et d'apprentissage afin de pouvoir s'appropier le sujet. En premier lieu, nous avons étudier le livre de Gilles Dowek$^{[4]}$ pour avoir une bonne idée de la théorie des langages de programmation. Par la suite, pour ancrer ces notions, nous avons suivit l'introduction du cours de Xavier Leroy$^{[5]}$ et le livre de Benjamin C. Pierce$^{[1]}$. Ce dernier nous a orienté vers le sujet de nos recherches. En effet, il nous a permis de comprendre comment introduire les exceptions au sein de notre langage. En plus de ces lectures, nous avons dû apprendre OCaml pour pouvoir raisonner sur un exemple concret de langage fonctionnel.\\
+\tab Ce projet nous a permis d'avoir une idée globale du travail de chercheur. En effet, nous avons pu observer plusieurs phases au cours de ces six mois. La première a été la recherche lié à l'apprentissage. La seconde a été la réflexion afin de trouver l'idée pour notre transformation. Ensuite, il y a eu une phase plus concrète où nous avons essayé de mettre en pratique ce que nous avons imaginé durant la phase de réflexion. Enfin, la phase de rédaction de ce rapport, permettant de structurer et partager notre travail.\\
+\tab Pour conclure, il est certain que notre sujet, la compilation \textit{fully abstract}, est un domaine assez complexe. Le simple fait de proposer une transformation de programme pour un petit langage comme le nôtre a été assez difficile à réaliser. Il va sans dire qu'effectuer une transformation de programme pour préserver les abstractions offertes par celui-ci sur un vrai langage de programmation est bien plus compliqué que dans notre cas.
+
+\newpage
+\section*{Références}
+$^{[1]}$Benjamin C. Pierce, \textit{"Types and Programming Languages"}, Chapitres 2,3,5,8,9,11 et 14, 2002
+\sep
+$^{[2]}$Terence Parr, \textit{"Language implementation patterns"}, 2009
+\sep
+$^{[3]}$Marco Patrignani, Amal Ahmed, Dave Clarke, \textit{"Formal Approaches to Secure Compilation: A Survey of Fully Abstract Compilation and Related Work"}, ACM Computing Surveys, Article No.: 125, 2019
+\sep
+$^{[4]}$Gilles Dowek, Jean-Jacques Lévy, \textit{"Introduction à la théorie des langages de programmation"}, Les éditions de l'école polytechnique, 2006
+\sep
+$^{[5]}$Xavier Leroy, \textit{"Des expressions et des commandes : la sémantique d'un langage impératif"}, \url{https://www.college-de-france.fr/site/xavier-leroy/course-2019-11-28-09h30.htm}, (consulté 02.2020)
+
+
+\end{document}
